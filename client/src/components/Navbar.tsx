@@ -37,7 +37,7 @@ export function Navbar() {
         "fixed top-0 w-full z-50 transition-all duration-300",
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-md py-3"
-          : "bg-black/20 backdrop-blur-[2px] py-5"
+          : "bg-black/40 backdrop-blur-md py-5"
       )}
     >
       <div className="container-custom flex items-center justify-between">
@@ -54,31 +54,55 @@ export function Navbar() {
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-8">
           <Link href="/" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors",
-            scrolled ? "text-gray-800" : "text-white/90"
+            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
+            scrolled ? "text-gray-800" : "text-white/90",
+            location === "/" && "text-secondary"
           )}>
             Home
+            {location === "/" && (
+              <motion.div 
+                layoutId="nav-underline"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+              />
+            )}
           </Link>
           
           <Link href="/about" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors",
-            scrolled ? "text-gray-800" : "text-white/90"
+            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
+            scrolled ? "text-gray-800" : "text-white/90",
+            location === "/about" && "text-secondary"
           )}>
             Who We Are
+            {location === "/about" && (
+              <motion.div 
+                layoutId="nav-underline"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+              />
+            )}
           </Link>
 
           {/* Programs Dropdown */}
           <div className="relative group">
             <button className={cn(
-              "flex items-center gap-1 text-sm font-semibold hover:text-secondary transition-colors group-hover:text-secondary",
-              scrolled ? "text-gray-800" : "text-white/90"
+              "flex items-center gap-1 text-sm font-semibold hover:text-secondary transition-colors group-hover:text-secondary relative py-1",
+              scrolled ? "text-gray-800" : "text-white/90",
+              location.startsWith("/programs") && "text-secondary"
             )}>
               Our Programs <ChevronDown className="w-4 h-4" />
+              {location.startsWith("/programs") && (
+                <motion.div 
+                  layoutId="nav-underline"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+                />
+              )}
             </button>
             <div className="absolute top-full left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
               <div className="bg-white rounded-xl shadow-xl p-2 border border-gray-100 overflow-hidden">
                 {programs.map((prog) => (
-                  <Link key={prog.href} href={prog.href} className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-primary rounded-lg transition-colors">
+                  <Link key={prog.href} href={prog.href} className={cn(
+                    "block px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                    location === prog.href ? "bg-green-50 text-primary" : "text-gray-700 hover:bg-green-50 hover:text-primary"
+                  )}>
                     {prog.title}
                   </Link>
                 ))}
@@ -87,24 +111,45 @@ export function Navbar() {
           </div>
 
           <Link href="/gallery" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors",
-            scrolled ? "text-gray-800" : "text-white/90"
+            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
+            scrolled ? "text-gray-800" : "text-white/90",
+            location === "/gallery" && "text-secondary"
           )}>
             Gallery
+            {location === "/gallery" && (
+              <motion.div 
+                layoutId="nav-underline"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+              />
+            )}
           </Link>
 
           <Link href="/blog" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors",
-            scrolled ? "text-gray-800" : "text-white/90"
+            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
+            scrolled ? "text-gray-800" : "text-white/90",
+            location === "/blog" && "text-secondary"
           )}>
             News & Blog
+            {location === "/blog" && (
+              <motion.div 
+                layoutId="nav-underline"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+              />
+            )}
           </Link>
 
           <Link href="/contact" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors",
-            scrolled ? "text-gray-800" : "text-white/90"
+            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
+            scrolled ? "text-gray-800" : "text-white/90",
+            location === "/contact" && "text-secondary"
           )}>
             Contact
+            {location === "/contact" && (
+              <motion.div 
+                layoutId="nav-underline"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
+              />
+            )}
           </Link>
         </div>
 

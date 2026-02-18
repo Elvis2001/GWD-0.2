@@ -1,10 +1,31 @@
 import { Link } from "wouter";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { SiGoogle as GoogleIcon, SiFacebook as FacebookIcon } from "react-icons/si";
 
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container-custom">
+        {/* Partners Section */}
+        <div className="border-b border-gray-800 pb-12 mb-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <h3 className="text-lg font-bold text-secondary mb-1">Our Partners</h3>
+              <p className="text-gray-400 text-sm">Working together for sustainable change</p>
+            </div>
+            <div className="flex items-center gap-12 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all">
+              <div className="flex items-center gap-2">
+                <GoogleIcon className="w-8 h-8" />
+                <span className="font-semibold text-xl">Google</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FacebookIcon className="w-8 h-8" />
+                <span className="font-semibold text-xl">Facebook</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
           <div className="space-y-4">

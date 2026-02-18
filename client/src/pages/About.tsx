@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
 import { useTeam } from "@/hooks/use-content";
-import { CheckCircle2, Target, Lightbulb, Heart, Users, Landmark, Clock, Globe, Trophy, MapPin } from "lucide-react";
+import { CheckCircle2, Target, Lightbulb, Heart, Users, Landmark, Clock, Globe, Trophy, MapPin, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function About() {
@@ -102,6 +102,28 @@ export default function About() {
             description="Our values are the heartbeat of GWDYF, guiding every interaction and decision as we empower the next generation." 
           />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="col-span-2 md:col-span-1 lg:col-span-1 h-48 rounded-3xl overflow-hidden relative group"
+            >
+              <div className="absolute inset-0 z-0">
+                <motion.img 
+                  initial={{ scale: 1 }}
+                  animate={{ scale: 1.1 }}
+                  transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
+                  src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=2070&auto=format&fit=crop"
+                  className="w-full h-full object-cover"
+                  alt="Students in Uniform"
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+              <div className="relative z-10 p-6 h-full flex flex-col justify-end">
+                <Sparkles className="text-white w-6 h-6 mb-2" />
+                <h4 className="text-white font-bold text-lg">Who We ARE</h4>
+              </div>
+            </motion.div>
             {[
               { title: "FOCUS", color: "bg-blue-500", desc: "Concentrating our energy on measurable youth impact." },
               { title: "COMMITMENT", color: "bg-green-500", desc: "Unwavering dedication to our students' long-term success." },
