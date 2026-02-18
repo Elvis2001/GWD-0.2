@@ -94,6 +94,54 @@ export default function About() {
           </motion.div>
         </div>
 
+        {/* Core Values Section */}
+        <div className="mb-24">
+          <SectionHeader 
+            title="What Drives Us" 
+            subtitle="Our Core Values" 
+            description="Our values are the heartbeat of GWDYF, guiding every interaction and decision as we empower the next generation." 
+          />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[
+              { title: "FOCUS", color: "bg-blue-500", desc: "Concentrating our energy on measurable youth impact." },
+              { title: "COMMITMENT", color: "bg-green-500", desc: "Unwavering dedication to our students' long-term success." },
+              { title: "DISCIPLINE", color: "bg-purple-500", desc: "Consistency in our approach and educational standards." },
+              { title: "WE CAN DO IT", color: "bg-orange-500", desc: "A positive 'can-do' spirit in the face of any challenge." },
+              { title: "EXCELLENCE", color: "bg-red-500", desc: "Striving for the highest quality in everything we deliver." },
+              { title: "RESPECT", color: "bg-teal-500", desc: "Valuing every individual's unique potential and voice." },
+              { title: "FUN", color: "bg-yellow-500", desc: "Making learning an enjoyable and memorable adventure." }
+            ].map((value, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative h-48 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
+              >
+                <div className={cn("absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity", value.color)} />
+                <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                  <div className={cn("w-10 h-1 h-1 rounded-full mb-4", value.color)} />
+                  <div>
+                    <h4 className="text-xl font-black mb-2 tracking-tighter">{value.title}</h4>
+                    <p className="text-xs text-gray-600 leading-tight opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {value.desc}
+                    </p>
+                  </div>
+                </div>
+                <div className={cn("absolute bottom-0 left-0 w-full h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left", value.color)} />
+              </motion.div>
+            ))}
+          </div>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="mt-12 text-center text-lg text-gray-600 italic max-w-3xl mx-auto"
+          >
+            "These core values are not just words on a wall; they are the principles that enable GWDYF to bridge the gap between potential and performance, ensuring every young Nigerian we reach is equipped to lead with integrity and skill."
+          </motion.p>
+        </div>
+
         {/* Story Section */}
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
           <div>

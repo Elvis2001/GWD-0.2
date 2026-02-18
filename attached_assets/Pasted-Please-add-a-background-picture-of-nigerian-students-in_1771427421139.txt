@@ -1,0 +1,36 @@
+Please add a background picture of nigerian students in schoool on uniforms in all or part of the who we are page(use the instints of a pro frontend designer to determine the best possible design option, however there should be a background image with ken burn effects)
+let the get invovled button have a green hover effect so also the join our mission. Also add a Donate button in the " Why Your Involvement Matters" card and the button should route to the flutter dashboard page of the original website(gwd.com.ng).
+
+HOW IT WORKS((implement tHIS on the FLic page using cool and fun designs)
+Process Flow and Delivery
+Image
+Setting up FLiC involves the following:
+
+Establishing learner objectives:
+This will be accomplished during the students lecture at the commencement of the club. The steps below will be followed to understand the students’ needs.
+Image
+
+Learning Activities
+Lectures, Worksheets, online and board games, field trips to financial service organizations, group projects.
+
+Delivery method options
+This is mainly by In-person instruction (club supervisors and external facilitators) and via Technology.
+Image
+
+Pacing of delivery
+This will be Timeline- based (time driven goals) and not self or achievement based pace.
+
+Measurement method
+Student’s process will be measured using:
+
+Pre and post- test and survey at the beginning and end of each term
+
+Longer term testing and survey for graduating students
+
+Measure of behavioral change
+
+Also this in the flic page the following using good desgins also
+Title:How it works(sub heading-Process flow delivery)
+points listed beautifully:Establish learner objective, Program development,decide upon educational mix,outline course subjects,educator selection and preparation,curriculum selection select measuremenr methods, select continuin education methods.
+
+add 3 donation cards with three different prices with a donate button on each card on the "get involved page" in addition to whats already on the page
