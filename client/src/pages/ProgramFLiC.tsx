@@ -15,7 +15,10 @@ import {
   ExternalLink,
   Target,
   Users,
-  MessageSquare
+  MessageSquare,
+  Clock,
+  Trophy,
+  Target as TargetIcon
 } from "lucide-react";
 
 export default function ProgramFLiC() {
@@ -147,7 +150,7 @@ export default function ProgramFLiC() {
       </div>
 
       <div className="container-custom">
-        {/* Process Flow & Delivery Section */}
+        {/* Detailed How It Works Section */}
         <section className="mb-32">
           <SectionHeader 
             title="How It Works" 
@@ -155,103 +158,148 @@ export default function ProgramFLiC() {
             description="Our structured approach to ensuring every student gains practical financial knowledge."
           />
           
-          <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-start mb-24">
+            {/* Left Column - Steps 1 & 2 */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-8"
+              className="space-y-12"
             >
-              <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+              <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex gap-6 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                    <Target className="w-6 h-6" />
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <TargetIcon className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">1. Establishing Learner Objectives</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      This is accomplished during the students' lecture at the commencement of the club. We follow specific steps to deeply understand each student's unique needs.
+                    <h3 className="text-2xl font-bold mb-3">1. Establishing Learner Objectives</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      This is accomplished during the students' lecture at the commencement of the club. We follow specific steps to understand the students’ needs and tailor our approach accordingly.
                     </p>
                   </div>
                 </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2070&auto=format&fit=crop" 
-                  alt="Students Setting Objectives" 
-                  className="w-full h-48 object-cover rounded-2xl"
-                />
+                <div className="relative rounded-2xl overflow-hidden h-64 group">
+                  <img 
+                    src="https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Students Setting Objectives" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                    <p className="text-white text-sm font-medium">Interactive goal-setting sessions</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+              <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex gap-6 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
-                    <BookOpen className="w-6 h-6" />
+                  <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                    <BookOpen className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">2. Learning Activities</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      Lectures, worksheets, online and board games, field trips to financial service organizations, and collaborative group projects.
+                    <h3 className="text-2xl font-bold mb-3">2. Learning Activities</h3>
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                      Our curriculum is brought to life through a diverse mix of engaging activities designed for maximum retention and fun.
                     </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {["Lectures", "Worksheets", "Online Games", "Board Games", "Field Trips", "Group Projects"].map((activity, idx) => (
+                        <div key={idx} className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+                          <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                          <span className="text-sm font-medium text-gray-700">{activity}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </motion.div>
 
+            {/* Right Column - Steps 3, 4 & 5 */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-8"
+              className="space-y-12"
             >
-              <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+              <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex gap-6 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
-                    <School className="w-6 h-6" />
+                  <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                    <School className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">3. Delivery Method Options</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      Instruction is delivered mainly via in-person sessions led by club supervisors and external facilitators, enhanced by modern technology.
+                    <h3 className="text-2xl font-bold mb-3">3. Delivery Method Options</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      We use a blended learning model, primarily delivered via In-person instruction (club supervisors and external facilitators) and powered by Technology.
                     </p>
                   </div>
                 </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
-                  alt="Delivery Methods" 
-                  className="w-full h-48 object-cover rounded-2xl"
-                />
+                <div className="relative rounded-2xl overflow-hidden h-64 group">
+                  <img 
+                    src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Blended Learning Delivery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-50">
-                  <h4 className="font-bold mb-2 text-primary">4. Pacing</h4>
-                  <p className="text-xs text-gray-500">Timeline-based goals, not self-paced, to ensure consistent progress.</p>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 mb-6">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">4. Pacing of Delivery</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Timeline-based (time driven goals) approach ensuring consistent progress across all clubs, moving together as a community.
+                  </p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-50">
-                  <h4 className="font-bold mb-2 text-secondary">5. Measurement</h4>
-                  <p className="text-xs text-gray-500">Pre/post tests, surveys for graduates, and tracking behavioral change.</p>
+
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow">
+                  <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 mb-6">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">5. Measurement</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    We track success via pre/post tests, graduate surveys, and long-term behavioral change assessments.
+                  </p>
                 </div>
               </div>
             </motion.div>
           </div>
 
-          <div className="bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-white">
-            <h3 className="text-2xl font-bold mb-12 text-center underline decoration-primary underline-offset-8">Implementation Roadmap</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                "Establish learner objective", 
-                "Program development",
-                "Decide upon educational mix",
-                "Outline course subjects",
-                "Educator selection & prep",
-                "Curriculum selection",
-                "Select measurement methods",
-                "Select continuing education"
-              ].map((point, i) => (
-                <div key={i} className="flex items-center gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-bold shrink-0">{i+1}</div>
-                  <span className="text-sm font-medium">{point}</span>
-                </div>
-              ))}
+          {/* Implementation Roadmap */}
+          <div className="bg-gray-900 rounded-[4rem] p-12 lg:p-20 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -mr-48 -mt-48" />
+            <div className="relative z-10">
+              <div className="text-center mb-16">
+                <h3 className="text-3xl md:text-4xl font-black mb-4">Process Flow Delivery</h3>
+                <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
+              </div>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                {[
+                  "Establish learner objective", 
+                  "Program development",
+                  "Decide upon educational mix",
+                  "Outline course subjects",
+                  "Educator selection and preparation",
+                  "Curriculum selection",
+                  "Select measurement methods",
+                  "Select continuing education methods"
+                ].map((point, i) => (
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex flex-col gap-4 bg-white/5 p-8 rounded-[2rem] border border-white/10 hover:bg-white/10 hover:border-primary/50 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-bold shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                      {i+1}
+                    </div>
+                    <span className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">{point}</span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

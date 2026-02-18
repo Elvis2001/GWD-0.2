@@ -138,13 +138,46 @@ export default function About() {
             whileInView={{ opacity: 1 }}
             className="mt-12 text-center text-lg text-gray-600 italic max-w-3xl mx-auto"
           >
-            "These core values are not just words on a wall; they are the principles that enable GWDYF to bridge the gap between potential and performance, ensuring every young Nigerian we reach is equipped to lead with integrity and skill."
+            "These core values are not just words on a wall; they are the principles that enable GWDYF to bridge the gap between potential and performance, ensuring every young Nigerian we reach is equipped to lead with integrity, skill, and a focus on excellence."
           </motion.p>
+        </div>
+
+        {/* Mission & Vision */}
+        <div className="grid md:grid-cols-2 gap-12 mb-24">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8" />
+            <h3 className="text-2xl font-bold mb-4 text-primary">Our Mission</h3>
+            <p className="text-gray-600 leading-relaxed">
+              To empower youth with financial literacy, leadership skills, and digital competencies necessary to thrive in the 21st-century economy. We strive to create equal opportunities for growth and success.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -mr-8 -mt-8" />
+            <h3 className="text-2xl font-bold mb-4 text-secondary">Our Vision</h3>
+            <p className="text-gray-600 leading-relaxed">
+              A world where every young person is financially literate, digitally skilled, and empowered to lead positive change in their communities and beyond.
+            </p>
+          </motion.div>
         </div>
 
         {/* Story Section */}
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
             <h2 className="text-3xl font-bold mb-6">Our Story</h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
@@ -157,19 +190,21 @@ export default function About() {
                 Today, GWDYF operates in over 12 communities, partnering with schools, universities, and corporate organizations to deliver high-impact programs that prepare youth for the future of work.
               </p>
             </div>
-          </div>
-          <div className="relative">
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="relative"
+          >
             <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-3" />
-            {/* Team meeting photo */}
             <img 
               src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop" 
               alt="Our Story" 
               className="relative rounded-3xl shadow-xl w-full"
             />
-          </div>
+          </motion.div>
         </div>
-
-        {/* Timeline of Achievements */}
         <div className="mb-24">
           <SectionHeader title="Our Journey" subtitle="Timeline" description="Key milestones and achievements in our mission to empower Nigerian youth." />
           <div className="relative max-w-4xl mx-auto pl-8 md:pl-0">
