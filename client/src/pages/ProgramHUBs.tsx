@@ -11,7 +11,8 @@ import {
   Sparkles,
   TrendingUp,
   Cpu,
-  HeartHandshake
+  HeartHandshake,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -128,9 +129,11 @@ export default function ProgramHUBs() {
                       <span className="text-sm font-medium text-gray-600">Students: {inst.students}</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="rounded-full w-fit group">
-                    Join Hub <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  </Button>
+                  <Link href={`/details/hub/aun-hub`}>
+                    <Button variant="outline" className="rounded-full w-full group py-6 border-2 border-primary/20 hover:border-primary hover:bg-primary/5">
+                      Explore Hub Details <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

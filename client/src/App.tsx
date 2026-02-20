@@ -29,6 +29,8 @@ import GetInvolved from "@/pages/GetInvolved";
 import Donate from "@/pages/Donate";
 import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
+import AdminDashboard from "@/pages/AdminDashboard";
+import DetailedView from "@/pages/DetailedView";
 
 function Router() {
   return (
@@ -47,6 +49,8 @@ function Router() {
           <Route path="/get-involved" component={GetInvolved} />
           <Route path="/donate" component={Donate} />
           <Route path="/contact" component={Contact} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/details/:type/:id" component={DetailedView} />
           <Route component={NotFound} />
         </Switch>
       </main>
