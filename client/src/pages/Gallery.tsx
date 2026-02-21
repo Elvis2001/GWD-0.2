@@ -1,32 +1,28 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
 import { Calendar, Clock, Image as ImageIcon } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
 export default function Gallery() {
-  const collections = [
+  const categories = [
     {
-      id: 1,
-      title: "FLiC Launch 2024",
-      date: "Feb 15, 2024",
-      time: "10:00 AM",
-      imageCount: 12,
-      coverImage: "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=2070&auto=format&fit=crop"
+      title: "FLiC Gallery",
+      category: "Secondary Schools",
+      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+      slug: "flic"
     },
     {
-      id: 2,
-      title: "Youth Tech Bootcamp",
-      date: "Jan 20, 2024",
-      time: "09:30 AM",
-      imageCount: 25,
-      coverImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop"
+      title: "HUBs / Youth Tech Bootcamps",
+      category: "Higher Institutions",
+      image: "https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=2070&auto=format&fit=crop",
+      slug: "hubs"
     },
     {
-      id: 3,
-      title: "Financial Literacy Games",
-      date: "Dec 12, 2023",
-      time: "11:00 AM",
-      imageCount: 18,
-      coverImage: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2000&auto=format&fit=crop"
+      title: "Financial Literacy Games & Activities",
+      category: "Workshops & Play",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
+      slug: "games"
     }
   ];
 
@@ -34,50 +30,32 @@ export default function Gallery() {
     <div className="pt-24 pb-16">
       <div className="container-custom">
         <SectionHeader 
-          title="Captured Moments" 
-          subtitle="Gallery" 
-          description="A visual journey through our programs, workshops, and the impact we make."
+          title="Our Gallery" 
+          subtitle="Moments of Impact" 
+          description="A visual journey through our programs, workshops, and the lives transformed through financial literacy."
         />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {collections.map((item, i) => (
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
+          {categories.map((cat, i) => (
             <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              key={i}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group cursor-pointer"
+              className="group relative h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl"
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img 
-                  src={item.coverImage} 
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                  <span className="text-white font-bold flex items-center gap-2">
-                    View Collection <ImageIcon className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-4 group-hover:text-primary transition-colors">{item.title}</h3>
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    {item.date}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {item.time}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4" />
-                    {item.imageCount} Images
-                  </div>
-                </div>
+              <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.title} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 p-8 w-full">
+                <span className="inline-block px-4 py-1 rounded-full bg-primary/20 text-primary-foreground text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md">
+                  {cat.category}
+                </span>
+                <h3 className="text-2xl font-black text-white mb-6 leading-tight">{cat.title}</h3>
+                <Link href={`/gallery/${cat.slug}`}>
+                  <Button className="w-full bg-white text-gray-900 hover:bg-primary hover:text-white font-bold h-12 rounded-xl transition-all border-none">
+                    View Gallery
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           ))}

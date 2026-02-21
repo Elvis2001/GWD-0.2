@@ -31,7 +31,7 @@ export default function About() {
   ];
 
   return (
-    <div className="pt-24 pb-16">
+    <div className="pb-16">
       {/* Hero Section with Ken Burns Effect */}
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -40,9 +40,7 @@ export default function About() {
             initial={{ scale: 1 }}
             animate={{ scale: 1.2 }}
             transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
-            src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop"
-            alt="Nigerian Students in School"
-            className="w-full h-full object-cover"
+            src= "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=2070&auto=format&fit=crop"
           />
         </div>
         <div className="container-custom relative z-20 text-center">
@@ -76,7 +74,7 @@ export default function About() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8" />
             <h3 className="text-2xl font-bold mb-4 text-primary">Our Mission</h3>
             <p className="text-gray-600 leading-relaxed">
-              To empower youth with financial literacy, leadership skills, and digital competencies necessary to thrive in the 21st-century economy. We strive to create equal opportunities for growth and success.
+             To provide exciting and unique opportunities for children and young adult’s learning and community building. We strive to bring together children and youths from diverse backgrounds, uniting them under the common objective of learning financial and money skills while having fun.
             </p>
           </motion.div>
 
@@ -89,7 +87,7 @@ export default function About() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -mr-8 -mt-8" />
             <h3 className="text-2xl font-bold mb-4 text-secondary">Our Vision</h3>
             <p className="text-gray-600 leading-relaxed">
-              A world where every young person is financially literate, digitally skilled, and empowered to lead positive change in their communities and beyond.
+              To create the right attitude towards money among the youths, preparing them to make better financial decisions in the future and reduce the poverty gap in Nigeria.
             </p>
           </motion.div>
         </div>
@@ -164,35 +162,6 @@ export default function About() {
           </motion.p>
         </div>
 
-        {/* Mission & Vision */}
-        <div className="grid md:grid-cols-2 gap-12 mb-24">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8" />
-            <h3 className="text-2xl font-bold mb-4 text-primary">Our Mission</h3>
-            <p className="text-gray-600 leading-relaxed">
-              To empower youth with financial literacy, leadership skills, and digital competencies necessary to thrive in the 21st-century economy. We strive to create equal opportunities for growth and success.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -mr-8 -mt-8" />
-            <h3 className="text-2xl font-bold mb-4 text-secondary">Our Vision</h3>
-            <p className="text-gray-600 leading-relaxed">
-              A world where every young person is financially literate, digitally skilled, and empowered to lead positive change in their communities and beyond.
-            </p>
-          </motion.div>
-        </div>
-
         {/* Story Section */}
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
           <motion.div
@@ -206,10 +175,13 @@ export default function About() {
                 The GWD Youth Foundation began as a small community initiative aimed at teaching basic financial concepts to high school students. Recognizing the immense gap in financial education, our founders set out to create a curriculum that was both engaging and practical.
               </p>
               <p>
-                Over the years, we expanded our scope to include digital skills training, realizing that financial literacy and technological proficiency go hand in hand in the modern world.
+                We envision having financial literate youth that make informed, thoughtful, and beneficial financial decisions not only in Nigeria but across the African continent.
               </p>
               <p>
-                Today, GWDYF operates in over 12 communities, partnering with schools, universities, and corporate organizations to deliver high-impact programs that prepare youth for the future of work.
+                  We have set up Financial Literacy Clubs (FLiC) in several Secondary Schools in Adamawa State and have seen dramatic improvements in knowledge of financial matters in students who join our Clubs.
+              </p>
+              <p>
+                We hope to expand to higher institutions starting with the ones around Adamawa state extending to nigeria and Africa at large
               </p>
             </div>
           </motion.div>
@@ -236,7 +208,7 @@ export default function About() {
             {[
               { year: "Launch", title: "Foundation Establishment", desc: "Founded by Nnenna Mosugu with a vision for youth empowerment." },
               { year: "2020", title: "First FLiC Club", desc: "Launch of our signature Financial Literacy Club model in secondary schools." },
-              { year: "2021", title: "ACT & Sunlight Partnership", desc: "Trained 50 youths in tech and entrepreneurship across Adamawa State." },
+              { year: "2021", title: "FLic Clubs impact", desc: "Trained 50 Secondary school students in financial literacy and entrepreneurship across Adamawa State." },
               { year: "2022", title: "NE Innovation Hub Partnership", desc: "31 IDPs trained in Social Innovation Entrepreneurship." },
               { year: "2023", title: "Mentors International Partnership", desc: "23 young women trained in advanced technology programs." },
               { year: "2024", title: "National Expansion", desc: "Expansion to 50+ schools, reaching 10,000+ students nationwide." }
@@ -293,58 +265,6 @@ export default function About() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        {/* Team Section */}
-        <div>
-          <SectionHeader title="Meet Our Team" subtitle="Leadership" description="The dedicated individuals driving our mission forward." />
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {team?.map((member) => (
-              <div key={member.id} className="group text-center">
-                <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden shadow-lg border-4 border-white">
-                  <img 
-                    src={member.imageUrl} 
-                    alt={member.name} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
-                <h4 className="text-xl font-bold">{member.name}</h4>
-                <p className="text-primary font-medium mb-2">{member.role}</p>
-                <p className="text-muted-foreground text-sm max-w-xs mx-auto">{member.bio}</p>
-              </div>
-            ))}
-            
-            {/* Static placeholders if no API data yet */}
-            {(!team || team.length === 0) && (
-              <>
-                <div className="group text-center">
-                  <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gray-200 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop" className="w-full h-full object-cover" alt="Sarah Johnson" />
-                  </div>
-                  <h4 className="text-xl font-bold">Sarah Johnson</h4>
-                  <p className="text-primary font-medium mb-2">Executive Director</p>
-                  <p className="text-muted-foreground text-sm max-w-xs mx-auto">Leading with passion and over 15 years of experience in youth development.</p>
-                </div>
-                <div className="group text-center">
-                  <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gray-200 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=1000&auto=format&fit=crop" className="w-full h-full object-cover" alt="David Chen" />
-                  </div>
-                  <h4 className="text-xl font-bold">David Chen</h4>
-                  <p className="text-primary font-medium mb-2">Program Director</p>
-                  <p className="text-muted-foreground text-sm max-w-xs mx-auto">Architecting our curriculum to ensure relevance and engagement.</p>
-                </div>
-                <div className="group text-center">
-                  <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gray-200 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1000&auto=format&fit=crop" className="w-full h-full object-cover" alt="Amara Okeke" />
-                  </div>
-                  <h4 className="text-xl font-bold">Amara Okeke</h4>
-                  <p className="text-primary font-medium mb-2">Community Outreach</p>
-                  <p className="text-muted-foreground text-sm max-w-xs mx-auto">Building bridges between GWDYF and the communities we serve.</p>
-                </div>
-              </>
-            )}
           </div>
         </div>
       </div>

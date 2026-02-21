@@ -7,6 +7,25 @@ import { usePosts, useTestimonials } from "@/hooks/use-content";
 export default function Home() {
   const { data: posts } = usePosts();
   const { data: testimonials } = useTestimonials();
+  const demoTestimonials = [
+    {
+      id: "demo-1",
+      name: "Aisha Bello",
+      role: "Student",
+      content:
+        "GWD's programs opened doors for me — I learned financial skills and gained confidence to start my own small business.",
+      imageUrl: "",
+    },
+    {
+      id: "demo-2",
+      name: "Chinedu Okafor",
+      role: "Parent",
+      content:
+        "I've seen my child's focus and ambition grow since joining GWD. The mentorship and resources are invaluable.",
+      imageUrl: "",
+    },
+  ];
+  const combinedTestimonials = [...(testimonials || []), ...demoTestimonials];
 
   return (
     <div className="overflow-x-hidden">
@@ -36,6 +55,10 @@ export default function Home() {
             >
               EMPOWERING THE NEXT GENERATION
             </motion.span>
+
+
+
+
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -65,6 +88,21 @@ export default function Home() {
                 Join Our Mission
               </Link>
             </motion.div>
+     
+          </div>
+          <div className="mt-10">
+              
+            <motion.span 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="inline-block px-4 py-2 rounded-full bg-secondary/90 text-white text-sm font-bold tracking-wide mb-6 backdrop-blur-sm"
+            >
+              Nnenna Mosugu
+              (EXECUTIVE DIRECTOR &
+              FOUNDER GWD)
+             
+            </motion.span>
           </div>
         </div>
 
@@ -82,7 +120,7 @@ export default function Home() {
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">10,000+</p>
+                  <p className="text-2xl font-bold text-white">1000+</p>
                   <p className="text-xs text-gray-300 uppercase tracking-wider">Students Reached</p>
                 </div>
               </div>
@@ -92,7 +130,7 @@ export default function Home() {
                   <Globe className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">50+</p>
+                  <p className="text-2xl font-bold text-white">10+</p>
                   <p className="text-xs text-gray-300 uppercase tracking-wider">Partner Schools</p>
                 </div>
               </div>
@@ -102,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* About Preview */}
-      <section className="section-padding bg-white relative overflow-hidden">
+      <section className="section-padding bg-white relative overflow-visible">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         
@@ -112,7 +150,7 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative -mt-16 lg:-mt-28"
             >
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
                  {/* Group of students collaborating */}
@@ -168,10 +206,10 @@ export default function Home() {
           <SectionHeader 
             title="Our Core Programs" 
             subtitle="What We Do"
-            description="We offer comprehensive programs designed to equip youth with the essential skills needed for the modern world."
+            description="We offer comprehensive Digital and financial literacy programs designed to equip youth with the essential skills needed for the modern world."
           />
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-2">
             {/* Program 1 */}
             <motion.div 
               whileHover={{ y: -10 }}
@@ -248,49 +286,30 @@ export default function Home() {
             description="Hear from the students, educators, and partners whose lives have been transformed by GWDYF programs."
             light={true}
           />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials && testimonials.length > 0 ? (
-              testimonials.slice(0, 3).map((item) => (
-                <div key={item.id} className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl font-bold">
-                          {item.name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">{item.name}</h4>
-                      <p className="text-white/70 text-sm">{item.role}</p>
-                    </div>
+          {/* Testimonials of students, parents, and partners: single responsive 3-column grid with equal heights */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(combinedTestimonials && combinedTestimonials.length > 0 ? combinedTestimonials : []).map((item) => (
+              <div key={item.id} className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 flex flex-col h-full">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 flex-shrink-0">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white/90">
+                        {item.name ? item.name.charAt(0) : "?"}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-gray-100 italic leading-relaxed">"{item.content}"</p>
-                </div>
-              ))
-            ) : (
-              // Placeholder testimonials
-              [1, 2, 3].map((i) => (
-                <div key={i} className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-white/20 animate-pulse" />
-                    <div>
-                      <div className="h-4 w-24 bg-white/20 rounded animate-pulse mb-2" />
-                      <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-full bg-white/10 rounded animate-pulse" />
-                    <div className="h-3 w-full bg-white/10 rounded animate-pulse" />
-                    <div className="h-3 w-2/3 bg-white/10 rounded animate-pulse" />
+                  <div>
+                    <h4 className="font-bold text-lg">{item.name}</h4>
+                    <p className="text-white/70 text-sm">{item.role}</p>
                   </div>
                 </div>
-              ))
-            )}
+                <p className="text-gray-100 italic leading-relaxed flex-1">"{item.content}"</p>
+              </div>
+            ))}
           </div>
+
         </div>
       </section>
 
@@ -346,14 +365,14 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-900 text-white relative overflow-hidden">
+      <section className="py-20 bg-black text-white relative overflow-hidden">
         {/* Abstract shapes */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20">
            <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary rounded-full blur-[128px]" />
            <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-secondary rounded-full blur-[96px]" />
         </div>
         
-        <div className="container-custom relative z-10 text-center max-w-4xl mx-auto">
+        <div className="container-custom relative z-10 text-center max-w-4xl mx-auto ">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Make an Impact?</h2>
           <p className="text-xl text-gray-300 mb-10 leading-relaxed">
             Join us in our mission to empower the next generation. Whether you want to volunteer, partner with us, or donate, your support matters.

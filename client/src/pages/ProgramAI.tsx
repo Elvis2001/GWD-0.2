@@ -21,14 +21,14 @@ export default function ProgramAI() {
 
   const programs = [
     {
-      title: "AI Literacy for Youth",
-      description: "Introduction to artificial intelligence, understanding its impact, and demystifying machine learning for the next generation of Nigerian leaders.",
+      title: "Savings and Digital Financial Oppunities",
+      description: "Intrroduction to effective saving strategies and how to leverage digital financial tools. We cover the basics of budgeting, saving, and using digital platforms for financial management.",
       icon: <BrainCircuit className="w-12 h-12" />,
       color: "bg-blue-50 text-blue-600",
       points: [
-        "Fundamentals of AI & Machine Learning",
-        "AI Ethics & Responsible Innovation",
-        "Future of Work in an AI World"
+        "Smart Saving Techniques",
+        "Digital Wallets & Mobile Banking",
+        "Online Investment Platforms"
       ]
     },
     {
@@ -78,9 +78,9 @@ export default function ProgramAI() {
     <div className="pt-24 pb-16">
       <div className="container-custom">
         <SectionHeader 
-          title="AI & Prompt Engineering" 
+          title="Digital Financial Literacy Resources" 
           subtitle="Future Skills" 
-          description="Preparing Nigerian youth for the AI revolution with practical skills in prompt engineering and artificial intelligence literacy."
+          description="Preparing Nigerian youth for the AI revolution with practical skills in prompt engineering and artificial intelligence thereby aiding financial literacy."
         />
 
         {/* Sliding Cards Container */}

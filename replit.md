@@ -84,3 +84,225 @@ Preferred communication style: Simple, everyday language.
 - **Replit Plugins** — `@replit/vite-plugin-runtime-error-modal`, `@replit/vite-plugin-cartographer`, `@replit/vite-plugin-dev-banner` for Replit development environment integration
 - **No authentication** — The site is currently public-facing with no auth system
 - **No payment integration yet** — The Donate page exists but payment processing is not implemented (Stripe is listed in build allowlist for future use)
+
+
+
+
+
+- **MY PROMPT** -
+# GWD Platform – Admin, Gallery & Dynamic Routing Implementation
+
+## Objective
+
+Implement a protected admin system with structured publishing logic, automatic frontend updates, gallery routing, and dynamic detailed pages.
+
+---
+
+# 1️⃣ Admin Authentication (Dummy Login System)
+
+## Requirement
+
+When a user navigates to:
+
+/admin
+
+If NOT authenticated:
+→ Automatically redirect to:
+
+/admin/login
+
+If authenticated:
+→ Redirect to:
+
+/admin/dashboard
+
+---
+
+## Dummy Credentials (For Now)
+
+Email:
+admin@gwd.com.ng
+
+Password:
+admin123
+
+---
+
+## Authentication Logic
+
+- Use LocalStorage or Context API to manage auth state
+- On successful login → Save auth state
+- On logout → Clear auth state and redirect to login page
+- Protect all `/admin/*` routes
+
+---
+
+# 2️⃣ Simplified Admin Dashboard Structure
+
+Modify the admin dashboard to contain ONLY these four categories:
+
+1. FLICs  
+2. HUBs  
+3. Blogs & News  
+4. Financial Literacy Games & Activities  
+
+Remove all other categories.
+
+---
+
+# 3️⃣ Smart Content Publishing Logic
+
+When content is posted from the Admin Dashboard, it must automatically update the frontend based on category.
+
+---
+
+## 🟢 If Category = FLICs
+
+Automatically:
+
+- Add to Homepage → “Success Stories”
+- Add to `/programs/flic`
+- Add to FLIC Gallery
+
+---
+
+## 🔵 If Category = HUBs
+
+Automatically:
+
+- Add to Homepage → “Success Stories”
+- Add to `/programs/hubs`
+- Add to HUBs Gallery
+
+---
+
+## 🟡 If Category = Financial Literacy Games & Activities
+
+Automatically:
+
+- Add to Games Section
+- Add to Games Gallery
+
+---
+
+## 📰 If Category = Blogs & News
+
+Automatically:
+
+- Add to `/blog`
+- Add to Homepage → “Latest Updates”
+
+---
+
+# 4️⃣ Gallery Page Structure
+
+Main Gallery Page should display:
+
+- FLIC Gallery
+- HUBs / Youth Tech Bootcamps
+- Financial Literacy Games & Activities
+
+---
+
+## Routing Behavior
+
+When clicked:
+
+FLIC → `/gallery/flic`  
+HUBs → `/gallery/hubs`  
+Games → `/gallery/games`  
+
+---
+
+# 5️⃣ Dynamic Detailed Pages
+
+Each Gallery Category must have dynamic routing using slugs.
+
+---
+
+## 🔹 FLIC Gallery
+
+Route:
+/gallery/flic
+
+Display:
+- List of FLIC Schools
+- Each school card should show:
+  - School Name
+  - Description
+  - Images
+  - Impact Report
+  - Key Activities
+
+When a school is clicked:
+
+/gallery/flic/[schoolSlug]
+
+Load:
+DetailedPage.tsx
+
+---
+
+## 🔹 HUBs / Youth Tech Bootcamps
+
+Route:
+/gallery/hubs
+
+Display:
+- HUB Institutions
+- Achievements
+- Key Activities
+- Images
+- Impact Reports
+
+When clicked:
+
+/gallery/hubs/[hubSlug]
+
+Load:
+DetailedPage.tsx
+
+---
+
+## 🔹 Financial Literacy Games & Activities
+
+Route:
+/gallery/games
+
+Display:
+- Game Categories
+- Activity Types
+- Images
+- Descriptions
+
+When clicked:
+
+/gallery/games/[gameSlug]
+
+Load:
+DetailedPage.tsx
+
+---
+
+# 6️⃣ Technical Architecture Requirements
+
+- Use reusable components
+- Use slug-based dynamic routing
+- Use modular content types
+- Maintain clean state management
+- Implement scalable file structure
+- All dynamic pages must load using:
+
+DetailedPage.tsx
+
+---
+
+# Final Goal
+
+Create a smart content-driven system where:
+
+- Admin posts once
+- Frontend updates automatically
+- Gallery organizes itself
+- Dynamic pages generate based on slugs
+- Routing is clean and scalable

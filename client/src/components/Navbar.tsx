@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const programs = [
   { title: "Financial Literacy Clubs (FLiC)", href: "/programs/flic" },
   { title: "HUBs (Higher Institutions)", href: "/programs/hubs" },
-  { title: "AI & Prompt Engineering", href: "/programs/ai" },
+  { title: "Resources(DFL)", href: "/programs/ai" },
 ];
 
 export function Navbar() {
