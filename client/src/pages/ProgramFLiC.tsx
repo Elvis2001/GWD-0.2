@@ -77,13 +77,13 @@ export default function ProgramFLiC() {
     {
       name: "Suleiman Ribadu College, Yola",
       location: "Bole Yolde Pate, Bako, Yola By-Pass Road, Adamawa State",
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+      image: "https://i.pinimg.com/736x/34/14/d5/3414d580f6ae85033ff80825fb7f109a.jpg",
       description: "Active FLiC participation with focus on entrepreneurship."
     },
     {
       name: "KAHA International Academy, Yola",
       location: "Jambutu, Yola, Adamawa State",
-      image: "https://images.unsplash.com/photo-1541339907198-e08756eaa402?q=80&w=2070&auto=format&fit=crop",
+      image: "https://i.pinimg.com/1200x/d7/fa/84/d7fa84b63eeafb825a0734ae1a1987a1.jpg",
       description: "Established FLiC program with regular workshops."
     },
     {
@@ -180,7 +180,7 @@ export default function ProgramFLiC() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden h-64 group">
                   <img 
-                    src="https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=2070&auto=format&fit=crop" 
+                    src="https://i.pinimg.com/1200x/46/7e/00/467e006faf1aaceb1876a9c97d099a5d.jpg" 
                     alt="Students Setting Objectives" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -234,7 +234,7 @@ export default function ProgramFLiC() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden h-64 group">
                   <img 
-                    src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop" 
+                    src="https://i.pinimg.com/1200x/d5/a5/6a/d5a56a9214c4b8d781d4b2eddcd19cd3.jpg" 
                     alt="Blended Learning Delivery" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

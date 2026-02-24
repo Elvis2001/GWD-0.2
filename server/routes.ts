@@ -1,63 +1,72 @@
 import type { Express } from "express";
-import type { Server } from "http";
 import { storage } from "./storage";
-import { api, errorSchemas } from "@shared/routes";
 import { z } from "zod";
-import { insertContactMessageSchema, posts, teamMembers, galleryItems, testimonials } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+import type { InsertContactMessage } from "@shared/types";
+
+const API_PATHS = {
+  posts: "/api/posts",
+  postBySlug: "/api/posts/:slug",
+  team: "/api/team",
+  gallery: "/api/gallery",
+  testimonials: "/api/testimonials",
+  contact: "/api/contact",
+} as const;
+
+const insertContactMessageSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  subject: z.string().min(1),
+  message: z.string().min(1),
+});
 
 export async function registerRoutes(
-  httpServer: Server,
   app: Express
-): Promise<Server> {
-  
+): Promise<void> {
   // API Routes
-  app.get(api.posts.list.path, async (req, res) => {
+  app.get(API_PATHS.posts, async (_req, res) => {
     const posts = await storage.getPosts();
     res.json(posts);
   });
 
-  app.get(api.posts.get.path, async (req, res) => {
+  app.get(API_PATHS.postBySlug, async (req, res) => {
     const post = await storage.getPostBySlug(req.params.slug);
     if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
+      return res.status(404).json({ message: "Post not found" });
     }
     res.json(post);
   });
 
-  app.get(api.team.list.path, async (req, res) => {
+  app.get(API_PATHS.team, async (_req, res) => {
     const team = await storage.getTeamMembers();
     res.json(team);
   });
 
-  app.get(api.gallery.list.path, async (req, res) => {
+  app.get(API_PATHS.gallery, async (_req, res) => {
     const items = await storage.getGalleryItems();
     res.json(items);
   });
 
-  app.get(api.testimonials.list.path, async (req, res) => {
+  app.get(API_PATHS.testimonials, async (_req, res) => {
     const testimonials = await storage.getTestimonials();
     res.json(testimonials);
   });
 
-  app.post(api.contact.submit.path, async (req, res) => {
+  app.post(API_PATHS.contact, async (req, res) => {
     try {
-      const input = insertContactMessageSchema.parse(req.body);
+      const input = insertContactMessageSchema.parse(req.body) as InsertContactMessage;
       await storage.createContactMessage(input);
       res.status(201).json({ success: true, message: "Message received (Mock Mode)" });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
-          field: err.errors[0].path.join('.'),
+          field: err.errors[0].path.join("."),
         });
       }
       throw err;
     }
   });
-
-  return httpServer;
 }
 
 // Seed Data Function (No-op in mock mode)

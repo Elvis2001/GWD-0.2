@@ -184,7 +184,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 bg-white z-40 lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto"
+            className="fixed inset-0 bg-white z-40 lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto h-screen"
           >
             <div className="flex flex-col gap-6 text-lg font-semibold text-gray-800">
               <Link href="/" className="py-2 border-b border-gray-100">Home</Link>

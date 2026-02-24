@@ -1,28 +1,40 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
-import { InsertContactMessage } from "@shared/schema";
+import { buildApiUrl } from "@/lib/api";
+import type { ApiError, GalleryItem, InsertContactMessage, Post, TeamMember, Testimonial } from "@shared/types";
+
+const api = {
+  posts: "/api/posts",
+  postBySlug: "/api/posts/:slug",
+  team: "/api/team",
+  gallery: "/api/gallery",
+  testimonials: "/api/testimonials",
+  contact: "/api/contact",
+} as const;
+
+function buildPostUrl(slug: string): string {
+  return buildApiUrl(api.postBySlug.replace(":slug", encodeURIComponent(slug)));
+}
 
 // Posts
 export function usePosts() {
   return useQuery({
-    queryKey: [api.posts.list.path],
+    queryKey: [api.posts],
     queryFn: async () => {
-      const res = await fetch(api.posts.list.path);
+      const res = await fetch(buildApiUrl(api.posts), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch posts");
-      return api.posts.list.responses[200].parse(await res.json());
+      return (await res.json()) as Post[];
     },
   });
 }
 
 export function usePost(slug: string) {
   return useQuery({
-    queryKey: [api.posts.get.path, slug],
+    queryKey: [api.postBySlug, slug],
     queryFn: async () => {
-      const url = buildUrl(api.posts.get.path, { slug });
-      const res = await fetch(url);
+      const res = await fetch(buildPostUrl(slug), { credentials: "include" });
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch post");
-      return api.posts.get.responses[200].parse(await res.json());
+      return (await res.json()) as Post;
     },
     enabled: !!slug,
   });
@@ -31,11 +43,11 @@ export function usePost(slug: string) {
 // Team
 export function useTeam() {
   return useQuery({
-    queryKey: [api.team.list.path],
+    queryKey: [api.team],
     queryFn: async () => {
-      const res = await fetch(api.team.list.path);
+      const res = await fetch(buildApiUrl(api.team), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch team members");
-      return api.team.list.responses[200].parse(await res.json());
+      return (await res.json()) as TeamMember[];
     },
   });
 }
@@ -43,11 +55,11 @@ export function useTeam() {
 // Gallery
 export function useGallery() {
   return useQuery({
-    queryKey: [api.gallery.list.path],
+    queryKey: [api.gallery],
     queryFn: async () => {
-      const res = await fetch(api.gallery.list.path);
+      const res = await fetch(buildApiUrl(api.gallery), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch gallery items");
-      return api.gallery.list.responses[200].parse(await res.json());
+      return (await res.json()) as GalleryItem[];
     },
   });
 }
@@ -55,11 +67,11 @@ export function useGallery() {
 // Testimonials
 export function useTestimonials() {
   return useQuery({
-    queryKey: [api.testimonials.list.path],
+    queryKey: [api.testimonials],
     queryFn: async () => {
-      const res = await fetch(api.testimonials.list.path);
+      const res = await fetch(buildApiUrl(api.testimonials), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch testimonials");
-      return api.testimonials.list.responses[200].parse(await res.json());
+      return (await res.json()) as Testimonial[];
     },
   });
 }
@@ -68,21 +80,21 @@ export function useTestimonials() {
 export function useSubmitContact() {
   return useMutation({
     mutationFn: async (data: InsertContactMessage) => {
-      const validated = api.contact.submit.input.parse(data);
-      const res = await fetch(api.contact.submit.path, {
-        method: api.contact.submit.method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validated),
+      const res = await fetch(buildApiUrl(api.contact), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
       });
       
       if (!res.ok) {
         if (res.status === 400) {
-          const error = api.contact.submit.responses[400].parse(await res.json());
+          const error = (await res.json()) as ApiError;
           throw new Error(error.message);
         }
-        throw new Error('Failed to submit message');
+        throw new Error("Failed to submit message");
       }
-      return api.contact.submit.responses[201].parse(await res.json());
+      return (await res.json()) as { success: boolean; message: string };
     },
   });
 }

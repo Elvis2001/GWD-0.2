@@ -1,107 +1,78 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
 import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
-import { createServer } from "http";
+
+dotenv.config();
 
 const app = express();
-const httpServer = createServer(app);
-
-declare module "http" {
-  interface IncomingMessage {
-    rawBody: unknown;
-  }
+const frontendUrl = process.env.FRONTEND_URL;
+if (!frontendUrl) {
+  throw new Error("FRONTEND_URL environment variable must be set.");
 }
 
+app.use(express.json());
 app.use(
-  express.json({
-    verify: (req, _res, buf) => {
-      req.rawBody = buf;
-    },
+  cors({
+    origin: frontendUrl,
+    credentials: true,
   }),
 );
 
-app.use(express.urlencoded({ extended: false }));
-
-export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+const port = Number(process.env.PORT);
+if (Number.isNaN(port)) {
+  throw new Error("PORT environment variable must be set to a valid number.");
 }
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+async function start() {
+  await registerRoutes(app);
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
-(async () => {
-  await registerRoutes(httpServer, app);
-
-  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    console.error("Internal Server Error:", err);
-
-    if (res.headersSent) {
-      return next(err);
-    }
-
-    return res.status(status).json({ message });
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
+    const clientDistPath = path.resolve(__dirname, "..", "..", "client", "dist");
+    const indexPath = path.join(clientDistPath, "index.html");
+
+    if (fs.existsSync(indexPath)) {
+      app.use(express.static(clientDistPath));
+      app.get("*", (req, res) => {
+        if (req.path.startsWith("/api")) {
+          res.status(404).json({ message: "Not Found" });
+          return;
+        }
+        res.sendFile(indexPath);
+      });
+    }
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  const listenOptions: any = {
-    port,
-    host: "0.0.0.0",
-  };
+  app.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
+    if (res.headersSent) {
+      next(err);
+      return;
+    }
 
-  // `reusePort` is not supported on some platforms (notably Windows).
-  // Only set it when the platform supports it to avoid ENOTSUP errors.
-  if (process.platform !== "win32") {
-    listenOptions.reusePort = true;
-  }
+    const statusCode =
+      typeof err === "object" &&
+      err !== null &&
+      "status" in err &&
+      typeof (err as { status?: unknown }).status === "number"
+        ? (err as { status: number }).status
+        : 500;
 
-  httpServer.listen(listenOptions, () => {
-    log(`serving on port ${port}`);
+    const message =
+      typeof err === "object" &&
+      err !== null &&
+      "message" in err &&
+      typeof (err as { message?: unknown }).message === "string"
+        ? (err as { message: string }).message
+        : "Internal Server Error";
+
+    res.status(statusCode).json({ message });
   });
-})();
+
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`API server listening on port ${port}`);
+  });
+}
+
+void start();

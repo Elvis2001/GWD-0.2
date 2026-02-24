@@ -5,7 +5,7 @@ import {
   type Testimonial, 
   type ContactMessage, 
   type InsertContactMessage 
-} from "@shared/schema";
+} from "@shared/types";
 
 export interface IStorage {
   getPosts(): Promise<Post[]>;

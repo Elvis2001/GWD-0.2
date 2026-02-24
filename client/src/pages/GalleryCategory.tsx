@@ -11,8 +11,8 @@ const CATEGORY_DATA: Record<string, any> = {
     subtitle: "Secondary School Impact",
     icon: <GraduationCap className="w-12 h-12 text-primary" />,
     items: [
-      { id: "jimeta-sec", name: "Jimeta Secondary School", location: "Yola", image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop", desc: "Leading the way in financial literacy graduation rates." },
-      { id: "yola-sec", name: "Yola Model School", location: "Jimeta", image: "https://images.unsplash.com/photo-1541339907198-e08756eaa402?q=80&w=2070&auto=format&fit=crop", desc: "Our first pilot school in Adamawa state." }
+      { id: "jimeta-sec", name: "Jimeta Secondary School", location: "Yola", image: "https://i.pinimg.com/736x/56/29/48/5629481f924f3ede22bd48c08ce273c5.jpg", desc: "Leading the way in financial literacy graduation rates." },
+      { id: "yola-sec", name: "Yola Model School", location: "Jimeta", image: "https://i.pinimg.com/1200x/a0/03/be/a003be1a0c1916de1a66ab43ec6af2bb.jpg", desc: "Our first pilot school in Adamawa state." }
     ]
   },
   hubs: {
@@ -20,7 +20,7 @@ const CATEGORY_DATA: Record<string, any> = {
     subtitle: "Higher Institution Innovation",
     icon: <School className="w-12 h-12 text-primary" />,
     items: [
-      { id: "aun-hub", name: "AUN Innovation Hub", location: "Yola", image: "https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=2070&auto=format&fit=crop", desc: "Centering leadership and AI skills for the next generation." },
+      { id: "aun-hub", name: "AUN Innovation Hub", location: "Yola", image: "https://i.pinimg.com/736x/7e/30/88/7e3088bf1a6ab51a67930c7530027b57.jpg", desc: "Centering leadership and AI skills for the next generation." },
       { id: "mau-hub", name: "MAU Technical Hub", location: "MAU Yola", image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2066&auto=format&fit=crop", desc: "Vocational and digital skills development center." }
     ]
   },

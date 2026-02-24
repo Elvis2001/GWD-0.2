@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertContactMessageSchema, InsertContactMessage } from "@shared/schema";
+import { insertContactMessageSchema } from "@/lib/validation";
+import type { InsertContactMessage } from "@shared/types";
 import { useSubmitContact } from "@/hooks/use-content";
 import { useToast } from "@/hooks/use-toast";
 import { SectionHeader } from "@/components/SectionHeader";

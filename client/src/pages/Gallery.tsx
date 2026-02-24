@@ -9,13 +9,13 @@ export default function Gallery() {
     {
       title: "FLiC Gallery",
       category: "Secondary Schools",
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+      image: "https://i.pinimg.com/1200x/f3/4b/35/f34b3538f5b55c37425452f5a01f7602.jpg",
       slug: "flic"
     },
     {
       title: "HUBs / Youth Tech Bootcamps",
       category: "Higher Institutions",
-      image: "https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=2070&auto=format&fit=crop",
+      image: "https://i.pinimg.com/736x/ea/88/37/ea8837da8c1107875467a942d833d506.jpg",
       slug: "hubs"
     },
     {

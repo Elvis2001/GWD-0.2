@@ -155,7 +155,7 @@ export default function Home() {
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
                  {/* Group of students collaborating */}
                 <img 
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
+                  src="https://i.pinimg.com/1200x/0e/23/f3/0e23f3473158807908d251dab2523841.jpg" 
                   alt="Students Collaborating" 
                   className="w-full h-auto"
                 />
