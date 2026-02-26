@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
 import { SectionHeader } from "@/components/SectionHeader";
 import { useTeam } from "@/hooks/use-content";
 import { CheckCircle2, Target, Lightbulb, Heart, Users, Landmark, Clock, Globe, Trophy, MapPin, Sparkles } from "lucide-react";
@@ -30,10 +31,68 @@ export default function About() {
     }
   ];
 
+  // Animated counters for impact stats
+  const formatNumber = (n: number) => new Intl.NumberFormat().format(n);
+
+  function AnimatedNumber({ target, suffix, inView }: { target: number; suffix?: string; inView: boolean }) {
+    const [num, setNum] = useState(0);
+    useEffect(() => {
+      if (!inView || !target) return;
+      let start: number | null = null;
+      const duration = 1400;
+      const step = (ts: number) => {
+        if (!start) start = ts;
+        const progress = Math.min((ts - start) / duration, 1);
+        const current = Math.floor(progress * target);
+        setNum(current);
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, [inView, target]);
+
+    return (
+      <h4 className="text-3xl md:text-4xl font-bold mb-1">
+        {formatNumber(num)}{suffix || ""}
+      </h4>
+    );
+  }
+
+  const ImpactStats = () => {
+    const statsRef = useRef<HTMLDivElement | null>(null);
+    const inView = useInView(statsRef, { once: true });
+
+    const stats = [
+      { label: "Students Reached", value: "10,000+", icon: <Users className="w-6 h-6" />, target: 10000, suffix: "+" },
+      { label: "Schools & Institutions", value: "50+", icon: <Landmark className="w-6 h-6" />, target: 50, suffix: "+" },
+      { label: "Training Hours", value: "25,000+", icon: <Clock className="w-6 h-6" />, target: 25000, suffix: "+" },
+      { label: "Partner Organizations", value: "15+", icon: <Globe className="w-6 h-6" />, target: 15, suffix: "+" },
+      { label: "Active Yola Locations", value: "6", icon: <MapPin className="w-6 h-6" />, target: 6, suffix: "" },
+      { label: "State Reach", value: "Multiple", icon: <Trophy className="w-6 h-6" />, target: null, suffix: "" }
+    ];
+
+    return (
+      <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+        {stats.map((stat, i) => (
+          <div key={i} className="text-center">
+            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-primary">
+              {stat.icon}
+            </div>
+            {stat.target ? (
+              <AnimatedNumber target={stat.target} suffix={stat.suffix} inView={inView} />
+            ) : (
+              <h4 className="text-3xl md:text-4xl font-bold mb-1">{stat.value}</h4>
+            )}
+            <p className="text-gray-400 text-sm uppercase tracking-wider">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="pb-16">
       {/* Hero Section with Ken Burns Effect */}
-      <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[80vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/60 z-10" />
           <motion.img 
@@ -63,6 +122,9 @@ export default function About() {
       </section>
 
       <div className="container-custom py-24">
+
+
+
         {/* Mission & Vision */}
         <div className="grid md:grid-cols-2 gap-12 mb-24">
           <motion.div 
@@ -90,6 +152,14 @@ export default function About() {
               To create the right attitude towards money among the youths, preparing them to make better financial decisions in the future and reduce the poverty gap in Nigeria.
             </p>
           </motion.div>
+        </div>
+        {/* Impact Statistics Dashboard */}
+        <div className="mb-24 bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
+          <div className="relative z-10">
+            <SectionHeader title="Our Measurable Impact" subtitle="Dashboard" light centered className="mb-16" />
+            <ImpactStats />
+          </div>
         </div>
 
         {/* Core Values Section */}
@@ -119,7 +189,7 @@ export default function About() {
               </div>
               <div className="relative z-10 p-6 h-full flex flex-col justify-end">
                 <Sparkles className="text-white w-6 h-6 mb-2" />
-                <h4 className="text-white font-bold text-lg">Who We ARE</h4>
+                <h4 className="text-white font-bold text-lg">Our Core Values</h4>
               </div>
             </motion.div>
             {[
@@ -242,31 +312,8 @@ export default function About() {
           </div>
         </div>
 
-        {/* Impact Statistics Dashboard */}
-        <div className="mb-24 bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
-          <div className="relative z-10">
-            <SectionHeader title="Our Measurable Impact" subtitle="Dashboard" light centered className="mb-16" />
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-              {[
-                { label: "Students Reached", value: "10,000+", icon: <Users className="w-6 h-6" /> },
-                { label: "Schools & Institutions", value: "50+", icon: <Landmark className="w-6 h-6" /> },
-                { label: "Training Hours", value: "25,000+", icon: <Clock className="w-6 h-6" /> },
-                { label: "Partner Organizations", value: "15+", icon: <Globe className="w-6 h-6" /> },
-                { label: "Active Yola Locations", value: "6", icon: <MapPin className="w-6 h-6" /> },
-                { label: "State Reach", value: "Multiple", icon: <Trophy className="w-6 h-6" /> }
-              ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-primary">
-                    {stat.icon}
-                  </div>
-                  <h4 className="text-3xl md:text-4xl font-bold mb-1">{stat.value}</h4>
-                  <p className="text-gray-400 text-sm uppercase tracking-wider">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        
+        
       </div>
     </div>
   );

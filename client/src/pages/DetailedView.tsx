@@ -63,14 +63,14 @@ export default function DetailedView() {
   const data = mockDetails[`${params?.id}`] || mockDetails["aun-hub"];
 
   return (
-    <div className="pt-24 pb-24 bg-gray-50">
+    <div className="pb-24 bg-gray-50">
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/60 z-10" />
           <motion.img 
             initial={{ scale: 1 }}
-            animate={{ scale: 1.1 }}
+            animate={{ scale: 1.2 }}
             transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
             src={data.images[0]}
             className="w-full h-full object-cover"
@@ -91,22 +91,22 @@ export default function DetailedView() {
               {data.subtitle}
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-white mb-6">{data.title}</h1>
-            <div className="flex flex-wrap gap-6 text-gray-200">
+            <div className="flex flex-wrap gap-6 text-gray-200 ">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary" />
-                <span className="font-medium">{data.location}</span>
+                <span className="font-medium"><h4>{data.location}</h4></span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />
-                <span className="font-medium">{data.date}</span>
+                <span className="font-medium"><h4>{data.date}</h4></span>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <div className="container-custom -mt-20 relative z-30">
-        <div className="grid lg:grid-cols-3 gap-12">
+      <div className="container-custom mt-29 relative z-30">
+        <div className="grid lg:grid-cols-3 gap-12 mt-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
             <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white">
@@ -170,23 +170,12 @@ export default function DetailedView() {
 
           {/* Sidebar */}
           <div className="space-y-8">
-            <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
-              <CardContent className="p-8">
-                <h3 className="text-xl font-bold mb-6">Visit Our Website</h3>
-                <p className="text-gray-500 text-sm mb-8">Learn more about GWD Youth Foundation's national initiatives and programs.</p>
-                <a href="https://gwd.com.ng" target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full h-14 rounded-2xl bg-secondary text-white hover:bg-orange-600 font-bold transition-all shadow-lg shadow-secondary/20 border-none">
-                    <ExternalLink className="mr-2 w-5 h-5" /> Visit gwd.com.ng
-                  </Button>
-                </a>
-              </CardContent>
-            </Card>
 
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-primary text-white relative overflow-hidden">
               <CardContent className="p-8">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
                 <h3 className="text-xl font-bold mb-4 relative z-10">Get Involved</h3>
-                <p className="text-white/80 text-sm mb-8 relative z-10">Your support can help us expand this hub and reach more students.</p>
+                <p className="text-white/80 text-sm mb-8 relative z-10">Your support can help us expand this hub and reach more students or you can become a student yourself.</p>
                 <Link href="/get-involved">
                   <Button className="w-full h-12 rounded-xl bg-white text-primary hover:bg-gray-50 font-bold relative z-10 border-none">
                     Join Our Mission

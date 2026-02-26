@@ -63,20 +63,21 @@ export default function GalleryCategory() {
           {data.items.map((item: any, i: number) => (
             <motion.div
               key={item.id}
+              className="h-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white group hover:shadow-2xl transition-all">
+              <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white group hover:shadow-2xl transition-all h-full flex flex-col">
                 <div className="aspect-[4/3] overflow-hidden relative">
                   <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-bold text-gray-900 flex items-center gap-2">
                     <MapPin className="w-3 h-3 text-primary" /> {item.location}
                   </div>
                 </div>
-                <CardContent className="p-8">
+                <CardContent className="p-8 flex-1 flex flex-col">
                   <h3 className="text-2xl font-black mb-3 group-hover:text-primary transition-colors">{item.name}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-8">{item.desc}</p>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-8 flex-1">{item.desc}</p>
                   <Link href={`/details/${category}/${item.id}`}>
                     <Button className="w-full h-14 rounded-2xl bg-primary hover:bg-green-600 font-bold group shadow-lg shadow-primary/10">
                       View Full Details <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />

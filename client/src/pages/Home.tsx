@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Users, BookOpen, Trophy, Globe } from "lucide-react";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -7,6 +8,8 @@ import { usePosts, useTestimonials } from "@/hooks/use-content";
 export default function Home() {
   const { data: posts } = usePosts();
   const { data: testimonials } = useTestimonials();
+  const [studentsCount, setStudentsCount] = useState(0);
+  const [partnersCount, setPartnersCount] = useState(0);
   const demoTestimonials = [
     {
       id: "demo-1",
@@ -27,13 +30,37 @@ export default function Home() {
   ];
   const combinedTestimonials = [...(testimonials || []), ...demoTestimonials];
 
+  useEffect(() => {
+    const studentsTarget = 1000;
+    const partnersTarget = 10;
+    const durationMs = 1400;
+    const start = performance.now();
+
+    let rafId = 0;
+    const tick = (timestamp: number) => {
+      const elapsed = timestamp - start;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      setStudentsCount(Math.round(studentsTarget * eased));
+      setPartnersCount(Math.round(partnersTarget * eased));
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
   return (
     <div className="overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[600px] md:h-screen flex items-start md:items-center justify-center overflow-hidden py-16 sm:py-20 md:py-0">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 md:via-black/50 to-transparent z-10" />
           {/* Diverse group of happy youth learning outdoors */}
           <motion.img 
             initial={{ scale: 1.1 }}
@@ -45,98 +72,95 @@ export default function Home() {
           />
         </div>
 
-        <div className="container-custom relative z-20 pt-20">
-          <div className="max-w-3xl text-white">
-            <motion.span 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-2 rounded-full bg-secondary/90 text-white text-sm font-bold tracking-wide mb-6 backdrop-blur-sm"
-            >
-              EMPOWERING THE NEXT GENERATION
-            </motion.span>
+        <div className="container-custom relative z-10 w-full">
+          <div className="grid items-start gap-10 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-8">
+              <div className="max-w-3xl text-white pt-8 sm:pt-12 md:pt-20">
+                <motion.span 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-block px-4 py-2 rounded-full bg-secondary/90 text-white text-sm font-bold tracking-wide mb-6 backdrop-blur-sm"
+                >
+                  EMPOWERING THE NEXT GENERATION
+                </motion.span>
 
-
-
-
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1]"
-            >
-              Building Future <span className="text-primary-foreground">Leaders</span> Today
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="text-xl md:text-2xl text-gray-200 mb-10 leading-relaxed max-w-2xl"
-            >
-              GWD Youth Foundation equips young minds with financial literacy, digital skills, and leadership training to create sustainable impact.
-            </motion.p>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4"
-            >
-              <Link href="/programs/flic" className="btn-primary text-lg px-8 py-4 bg-primary hover:bg-green-600 transition-colors">
-                Explore Programs
-              </Link>
-              <Link href="/get-involved" className="btn-secondary text-lg px-8 py-4 hover:bg-green-50 hover:text-primary transition-colors">
-                Join Our Mission
-              </Link>
-            </motion.div>
-     
-          </div>
-          <div className="mt-10">
-              
-            <motion.span 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-2 rounded-full bg-secondary/90 text-white text-sm font-bold tracking-wide mb-6 backdrop-blur-sm"
-            >
-              Nnenna Mosugu
-              (EXECUTIVE DIRECTOR &
-              FOUNDER GWD)
-             
-            </motion.span>
-          </div>
-        </div>
-
-        {/* Impact Statistics Dashboard (Floating) */}
-        <motion.div 
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="hidden lg:block absolute bottom-12 right-12 z-20"
-        >
-          <div className="glass-card p-8 rounded-2xl max-w-xs border border-white/20 bg-white/10 backdrop-blur-xl">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-foreground">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">1000+</p>
-                  <p className="text-xs text-gray-300 uppercase tracking-wider">Students Reached</p>
-                </div>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1]"
+                >
+                  Building Future <span className="text-primary-foreground">Leaders</span> Today
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-10 leading-relaxed max-w-2xl"
+                >
+                  GWD Youth Foundation equips young minds with financial literacy, digital skills, and leadership training to create sustainable impact.
+                </motion.p>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
+                  <Link href="/programs/flic" className="btn-primary text-lg px-8 py-4 bg-primary hover:bg-green-600 transition-colors">
+                    Explore Programs
+                  </Link>
+                  <Link href="/get-involved" className="btn-secondary text-lg px-8 py-4 hover:bg-green-50 hover:text-primary transition-colors">
+                    Join Our Mission
+                  </Link>
+                </motion.div>
               </div>
-              <div className="h-px bg-white/10" />
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">10+</p>
-                  <p className="text-xs text-gray-300 uppercase tracking-wider">Partner Schools</p>
-                </div>
+
+              <div className="mt-8 sm:mt-10">
+                <motion.span 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-block px-4 py-2 rounded-full bg-secondary/90 text-white text-sm font-bold tracking-wide backdrop-blur-sm"
+                >
+                  Nnenna Mosugu (EXECUTIVE DIRECTOR & FOUNDER GWD)
+                </motion.span>
               </div>
             </div>
+
+            {/* Impact Statistics Dashboard */}
+            <motion.div 
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1, duration: 0.8 }}
+              className="hidden md:block md:mx-auto md:mt-4 lg:mt-0 lg:col-span-4 lg:justify-self-end w-full max-w-xs"
+            >
+              <div className="glass-card p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-foreground">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{studentsCount.toLocaleString()}+</p>
+                      <p className="text-xs text-gray-300 uppercase tracking-wider">Students Reached</p>
+                    </div>
+                  </div>
+                  <div className="h-px bg-white/10" />
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
+                      <Globe className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{partnersCount}+</p>
+                      <p className="text-xs text-gray-300 uppercase tracking-wider">Partner Schools</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* About Preview */}
@@ -150,7 +174,7 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative -mt-16 lg:-mt-28"
+              className="relative mt-8 lg:-mt-28"
             >
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
                  {/* Group of students collaborating */}
