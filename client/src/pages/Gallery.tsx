@@ -22,7 +22,7 @@ export default function Gallery() {
       title: "Financial Literacy Games & Activities",
       category: "Workshops & Play",
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
-      slug: "games"
+      slug: "activities"
     }
   ];
 

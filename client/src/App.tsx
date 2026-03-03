@@ -52,6 +52,7 @@ function Router() {
           <Route path="/donate" component={Donate} />
           <Route path="/contact" component={Contact} />
           <Route path="/admin" component={AdminLogin} />
+          <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/gallery/:category" component={GalleryCategory} />
           <Route path="/details/:type/:id" component={DetailedView} />

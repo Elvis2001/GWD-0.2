@@ -355,7 +355,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {posts && posts.length > 0 ? (
               posts.slice(0, 3).map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`} className="group block">
+                <Link key={post.id} href={`/details/blog/${post.id}`} className="group block">
                   <div className="rounded-2xl overflow-hidden shadow-md mb-4 aspect-video relative">
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
                     <img 

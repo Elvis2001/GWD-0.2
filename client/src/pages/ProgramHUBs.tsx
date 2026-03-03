@@ -15,42 +15,19 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Link } from "wouter";
+import { useProgramsByCategory } from "@/hooks/use-content";
 
 export default function ProgramHUBs() {
-  const institutions = [
-    {
-      name: "Modibbo Adama University (MAU), Yola",
-      hubName: "GWDYF Innovation Catalyst Hub",
-      focus: "STEM & Entrepreneurship",
-      image: "https://images.unsplash.com/photo-1541339907198-e08756eaa402?q=80&w=2070&auto=format&fit=crop",
-      students: "15,000+",
-      color: "border-blue-500"
-    },
-    {
-      name: "American University of Nigeria (AUN), Yola",
-      hubName: "GWDYF Leadership & AI Hub",
-      focus: "Digital Skills & Leadership",
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
-      students: "3,000+",
-      color: "border-amber-500"
-    },
-    {
-      name: "Adamawa State University (ADSU), Mubi",
-      hubName: "GWDYF Agri-Tech & Finance Hub",
-      focus: "Financial Literacy & Agri-Tech",
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
-      students: "12,000+",
-      color: "border-green-500"
-    },
-    {
-      name: "Federal Polytechnic, Mubi",
-      hubName: "GWDYF Technical Excellence Hub",
-      focus: "Vocational Skills & Business",
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2066&auto=format&fit=crop",
-      students: "10,000+",
-      color: "border-purple-500"
-    }
-  ];
+  const { data: hubPrograms } = useProgramsByCategory("hubs");
+  const institutions = (hubPrograms ?? []).map((program, i) => ({
+    name: program.title,
+    hubName: program.excerpt || "GWDYF Hub Program",
+    focus: program.impactReport || "Innovation & Leadership",
+    image: program.thumbnailImage || program.coverImage,
+    students: "Participants",
+    color: ["border-blue-500", "border-amber-500", "border-green-500", "border-purple-500"][i % 4],
+    id: program.id,
+  }));
 
   const features = [
     { title: "Collaborative Workspace", desc: "Modern hubs equipped with fast internet and collaborative tools.", icon: <Users className="w-6 h-6" /> },
@@ -129,7 +106,7 @@ export default function ProgramHUBs() {
                       <span className="text-sm font-medium text-gray-600">Students: {inst.students}</span>
                     </div>
                   </div>
-                  <Link href={`/details/hub/aun-hub`}>
+                  <Link href={`/details/hubs/${inst.id}`}>
                     <Button variant="outline" className="rounded-full w-full group py-6 border-2 border-primary/20 hover:border-primary hover:bg-primary/5">
                       Explore Hub Details <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -138,6 +115,11 @@ export default function ProgramHUBs() {
               </div>
             </motion.div>
           ))}
+          {institutions.length === 0 && (
+            <p className="col-span-2 text-center text-muted-foreground py-12">
+              No HUB entries have been published yet.
+            </p>
+          )}
         </div>
 
         {/* Key Programs Breakdown */}
