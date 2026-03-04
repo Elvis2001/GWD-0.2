@@ -1,11 +1,11 @@
+import "dotenv/config";
+
 import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import { registerRoutes } from "./routes";
 
-dotenv.config();
 
 const app = express();
 const frontendUrl = process.env.FRONTEND_URL;

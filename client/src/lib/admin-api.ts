@@ -1,5 +1,5 @@
 import { buildApiUrl } from "./api";
-import { getAdminToken } from "./admin-auth";
+import { clearAdminToken, getAdminToken } from "./admin-auth";
 
 type AdminPostPayload = {
   title: string;
@@ -41,6 +41,22 @@ function appendPostFormData(formData: FormData, payload: AdminPostPayload): void
   payload.gallery?.forEach((file) => formData.append("gallery", file));
 }
 
+async function parseApiError(
+  res: Response,
+  fallback: string,
+  sessionExpiredFallback: string,
+): Promise<Error> {
+  const error = await res.json().catch(() => ({ message: fallback }));
+  const message = typeof error.message === "string" ? error.message : fallback;
+
+  if (res.status === 401 || message.toLowerCase().includes("invalid token")) {
+    clearAdminToken();
+    return new Error(sessionExpiredFallback);
+  }
+
+  return new Error(message || fallback);
+}
+
 export async function createAdminPost(payload: AdminPostPayload): Promise<unknown> {
   const formData = new FormData();
   appendPostFormData(formData, payload);
@@ -52,8 +68,11 @@ export async function createAdminPost(payload: AdminPostPayload): Promise<unknow
   });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Failed to create post" }));
-    throw new Error(error.message || "Failed to create post");
+    throw await parseApiError(
+      res,
+      "Failed to create post",
+      "Session expired or invalid. Please log in again.",
+    );
   }
   return res.json();
 }
@@ -68,8 +87,11 @@ export async function createAdminProgram(payload: AdminPostPayload): Promise<unk
     body: formData,
   });
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Failed to create program" }));
-    throw new Error(error.message || "Failed to create program");
+    throw await parseApiError(
+      res,
+      "Failed to create program",
+      "Session expired or invalid. Please log in again.",
+    );
   }
   return res.json();
 }

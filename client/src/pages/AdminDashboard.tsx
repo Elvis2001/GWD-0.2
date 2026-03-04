@@ -8,13 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { clearAdminToken, isAdminLoggedIn } from "@/lib/admin-auth";
+import { clearAdminToken, getAdminToken, isAdminLoggedIn } from "@/lib/admin-auth";
 import { createAdminPost, createAdminProgram } from "@/lib/admin-api";
+import { supabase } from "@/lib/supabase";
 
 type Category = "flic" | "hubs" | "activities" | "blog";
 
 type FormState = {
   title: string;
+  name: string;
   excerpt: string;
   content: string;
   author: string;
@@ -26,6 +28,7 @@ type FormState = {
 
 const emptyForm: FormState = {
   title: "",
+  name: "",
   excerpt: "",
   content: "",
   author: "",
@@ -33,6 +36,25 @@ const emptyForm: FormState = {
   keyActivities: "",
   thumbnail: null,
   gallery: [],
+};
+
+type FieldCopy = {
+  title: string;
+  name: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  impactReport: string;
+  keyActivities: string;
+  thumbnailLabel: string;
+  galleryLabel: string;
+};
+
+const sectionLabel: Record<Category, string> = {
+  flic: "FLIC",
+  hubs: "HUBS",
+  activities: "ACTIVITIES",
+  blog: "BLOG",
 };
 
 export default function AdminDashboard() {
@@ -43,9 +65,26 @@ export default function AdminDashboard() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isAdminLoggedIn()) {
-      setLocation("/admin");
-    }
+    const validateToken = async () => {
+      if (!isAdminLoggedIn()) {
+        setLocation("/admin");
+        return;
+      }
+
+      const token = getAdminToken();
+      if (!token) {
+        setLocation("/admin");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        clearAdminToken();
+        setLocation("/admin");
+      }
+    };
+
+    void validateToken();
   }, [setLocation]);
 
   const config = useMemo(
@@ -57,6 +96,60 @@ export default function AdminDashboard() {
         description: "Creates activity program posts and gallery content.",
       },
       blog: { title: "Blogs & News", description: "Creates public blog/news posts." },
+    }),
+    [],
+  );
+
+  const fieldCopy = useMemo<Record<Category, FieldCopy>>(
+    () => ({
+      flic: {
+        title: "e.g. FLIC Cohort 2026: School Launch in Lagos",
+        name: "e.g. Government Girls Secondary School, Surulere",
+        excerpt: "One-sentence summary of the workshop, school, and key outcome.",
+        content:
+          "Write full FLIC report: school context, what students learned, and measurable outcome.",
+        author: "Program lead name (e.g. Jane Doe)",
+        impactReport: "Impact snapshot (e.g. 120 students trained, 3 schools reached).",
+        keyActivities: "Comma-separated (e.g. budgeting basics, savings challenge, Q&A)",
+        thumbnailLabel: "FLIC cover image",
+        galleryLabel: "FLIC activity photos (optional)",
+      },
+      hubs: {
+        title: "e.g. HUB Workshop: Digital Skills for Youth Leaders",
+        name: "e.g. Abuja Youth Innovation Hub",
+        excerpt: "Short summary of the HUB topic, participants, and result.",
+        content:
+          "Describe the HUB session in detail: objective, sessions delivered, and outcomes.",
+        author: "Facilitator or coordinator name",
+        impactReport: "Impact snapshot (e.g. 45 participants, 2 prototypes built).",
+        keyActivities: "Comma-separated (e.g. design sprint, mentorship circle, demo day)",
+        thumbnailLabel: "HUB cover image",
+        galleryLabel: "HUB session photos (optional)",
+      },
+      activities: {
+        title: "e.g. Financial Literacy Activity: Campus Budget Bootcamp",
+        name: "Optional activity venue/group name",
+        excerpt: "Brief summary of the activity and participant takeaway.",
+        content:
+          "Write activity details: setup, engagement format, and what changed after the session.",
+        author: "Activity owner name",
+        impactReport: "Impact snapshot (e.g. 80 attendees, 60% improved quiz score).",
+        keyActivities: "Comma-separated (e.g. spending audit, goal planning, reflection)",
+        thumbnailLabel: "Activity cover image",
+        galleryLabel: "Activity photos (optional)",
+      },
+      blog: {
+        title: "e.g. How Youth Can Build Better Money Habits in 2026",
+        name: "Optional series name",
+        excerpt: "SEO-friendly summary for homepage/blog cards (1-2 sentences).",
+        content:
+          "Write the article body: intro, key points, examples, and conclusion.",
+        author: "Author byline (e.g. GWD Editorial Team)",
+        impactReport: "Optional: include supporting metric or citation summary.",
+        keyActivities: "Optional tags, comma-separated (e.g. savings, students, budgeting)",
+        thumbnailLabel: "Blog cover image",
+        galleryLabel: "Additional blog images (optional)",
+      },
     }),
     [],
   );
@@ -82,6 +175,7 @@ export default function AdminDashboard() {
     try {
       const payload = {
         title: form.title,
+        name: form.name.trim() || undefined,
         category: activeTab,
         excerpt: form.excerpt,
         content: form.content,
@@ -127,7 +221,7 @@ export default function AdminDashboard() {
             <h1 className="text-4xl md:text-5xl font-black tracking-tight flex items-center gap-4">
               <LayoutDashboard className="w-10 h-10 text-primary" /> Admin Console
             </h1>
-            <p className="text-gray-500 mt-2 font-medium">Supabase + Cloudinary Publishing</p>
+            <p className="text-gray-500 mt-2 font-medium">Hello there admin</p>
           </div>
           <Button variant="ghost" onClick={handleLogout} className="rounded-full hover:text-red-500">
             <LogOut className="w-5 h-5 mr-2" /> Logout
@@ -159,39 +253,69 @@ export default function AdminDashboard() {
                     <CardDescription>{config[category].description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Title</label>
                     <Input
-                      placeholder="Title"
+                      placeholder={fieldCopy[activeTab].title}
                       value={form.title}
                       onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                     />
+                    </div>
+                    {(activeTab === "flic" || activeTab === "hubs") && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold">
+                          {activeTab === "flic" ? "School Name" : "Hub Name"}
+                        </label>
+                        <Input
+                          placeholder={fieldCopy[activeTab].name}
+                          value={form.name}
+                          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Excerpt</label>
                     <Input
-                      placeholder="Excerpt"
+                      placeholder={fieldCopy[activeTab].excerpt}
                       value={form.excerpt}
                       onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
                     />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Content</label>
                     <Textarea
-                      placeholder="Content"
+                      placeholder={fieldCopy[activeTab].content}
                       value={form.content}
                       onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
                       className="h-40"
                     />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Author</label>
                     <Input
-                      placeholder="Author (optional)"
+                      placeholder={fieldCopy[activeTab].author}
                       value={form.author}
                       onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
                     />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Impact Report</label>
                     <Input
-                      placeholder="Impact report (optional)"
+                      placeholder={fieldCopy[activeTab].impactReport}
                       value={form.impactReport}
                       onChange={(e) => setForm((prev) => ({ ...prev, impactReport: e.target.value }))}
                     />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Key Activities</label>
                     <Input
-                      placeholder="Key activities (comma-separated)"
+                      placeholder={fieldCopy[activeTab].keyActivities}
                       value={form.keyActivities}
                       onChange={(e) => setForm((prev) => ({ ...prev, keyActivities: e.target.value }))}
                     />
+                    </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Thumbnail image</label>
+                      <label className="text-sm font-semibold">{fieldCopy[activeTab].thumbnailLabel}</label>
                       <Input
                         type="file"
                         accept="image/*"
@@ -201,7 +325,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Gallery images (optional)</label>
+                      <label className="text-sm font-semibold">{fieldCopy[activeTab].galleryLabel}</label>
                       <Input
                         type="file"
                         accept="image/*"

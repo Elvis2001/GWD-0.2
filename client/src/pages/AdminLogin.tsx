@@ -7,7 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { isAdminLoggedIn, setAdminToken } from "@/lib/admin-auth";
+import { clearAdminToken, getAdminToken, isAdminLoggedIn, setAdminToken } from "@/lib/admin-auth";
+
+function getLoginErrorDescription(error: { code?: string; message?: string } | null): string {
+  const normalizedCode = error?.code?.toLowerCase();
+  const normalizedMessage = error?.message?.toLowerCase() ?? "";
+
+  if (normalizedCode === "email_not_confirmed" || normalizedMessage.includes("email not confirmed")) {
+    return "Your email is not confirmed yet. Check your inbox and confirm your account first.";
+  }
+
+  if (
+    normalizedCode === "invalid_credentials" ||
+    normalizedMessage.includes("invalid login credentials") ||
+    normalizedMessage.includes("invalid email or password")
+  ) {
+    return "Invalid email or password for this Supabase project. Verify the account exists in Supabase Auth and try again.";
+  }
+
+  if (normalizedCode === "invalid_api_key" || normalizedMessage.includes("invalid api key")) {
+    return "Supabase API key is invalid. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in client/.env.";
+  }
+
+  return error?.message || "Invalid email or password.";
+}
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
@@ -17,24 +40,38 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAdminLoggedIn()) {
+    const validateStoredToken = async () => {
+      if (!isAdminLoggedIn()) return;
+      const token = getAdminToken();
+      if (!token) return;
+
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        clearAdminToken();
+        return;
+      }
+
       setLocation("/admin/dashboard");
-    }
+    };
+
+    void validateStoredToken();
   }, [setLocation]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizedEmail,
       password,
     });
 
     if (error || !data.session?.access_token) {
       toast({
         title: "Access Denied",
-        description: error?.message || "Invalid email or password.",
+        description: getLoginErrorDescription(error),
         variant: "destructive",
       });
       setLoading(false);
@@ -51,7 +88,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-10 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -112,6 +149,7 @@ export default function AdminLogin() {
             </form>
           </CardContent>
         </Card>
+
       </motion.div>
     </div>
   );
