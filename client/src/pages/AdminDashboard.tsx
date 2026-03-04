@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { GraduationCap, School, Newspaper, Gamepad2, LogOut, Save, LayoutDashboard } from "lucide-react";
+import { GraduationCap, School, Newspaper, Gamepad2, LogOut, Save, LayoutDashboard, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { clearAdminToken, getAdminToken, isAdminLoggedIn } from "@/lib/admin-auth";
-import { createAdminPost, createAdminProgram } from "@/lib/admin-api";
+import {
+  createAdminPost,
+  createAdminProgram,
+  deleteAdminPost,
+  listAdminPosts,
+  type AdminPostSummary,
+} from "@/lib/admin-api";
 import { supabase } from "@/lib/supabase";
 
 type Category = "flic" | "hubs" | "activities" | "blog";
@@ -63,6 +69,9 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Category>("flic");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [posts, setPosts] = useState<AdminPostSummary[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -165,6 +174,26 @@ export default function AdminDashboard() {
     setForm(emptyForm);
   };
 
+  const loadPosts = async () => {
+    setLoadingPosts(true);
+    try {
+      const rows = await listAdminPosts();
+      setPosts(rows);
+    } catch (error) {
+      toast({
+        title: "Could not load posts",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadPosts();
+  }, []);
+
   const handleSubmit = async () => {
     if (!form.title.trim()) {
       toast({ title: "Missing title", description: "Title is required.", variant: "destructive" });
@@ -202,6 +231,7 @@ export default function AdminDashboard() {
         description: `${config[activeTab].title} content published successfully.`,
       });
       setForm(emptyForm);
+      await loadPosts();
     } catch (error) {
       toast({
         title: "Publish failed",
@@ -211,6 +241,46 @@ export default function AdminDashboard() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeletePost = async (id: string | number, title: string) => {
+    const confirmed = window.confirm(`Delete "${title}"?`);
+    if (!confirmed) return;
+
+    const postId = String(id);
+    setDeletingId(postId);
+    try {
+      await deleteAdminPost(postId);
+      setPosts((prev) => prev.filter((post) => String(post.id) !== postId));
+      toast({ title: "Deleted", description: "Post removed successfully." });
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const filteredPosts = useMemo(
+    () =>
+      posts
+        .filter((post) => post.category.toLowerCase() === activeTab)
+        .sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+    [activeTab, posts],
+  );
+
+  const formatDate = (value: string | null): string => {
+    if (!value) return "Unknown date";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "Unknown date";
+    return parsed.toLocaleDateString();
   };
 
   return (
@@ -342,6 +412,43 @@ export default function AdminDashboard() {
                       <Save className="w-4 h-4 mr-2" />
                       {submitting ? "Publishing..." : "Publish"}
                     </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-none shadow-xl bg-white rounded-[2rem] mt-8">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-black">
+                      Manage {config[category].title} Posts
+                    </CardTitle>
+                    <CardDescription>Delete previously published items for this section.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {loadingPosts && <p className="text-sm text-gray-500">Loading posts...</p>}
+                    {!loadingPosts && filteredPosts.length === 0 && (
+                      <p className="text-sm text-gray-500">No published items yet.</p>
+                    )}
+                    {!loadingPosts &&
+                      filteredPosts.map((post) => (
+                        <div
+                          key={String(post.id)}
+                          className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl border border-gray-100"
+                        >
+                          <div>
+                            <p className="font-semibold text-gray-900">{post.title}</p>
+                            <p className="text-xs text-gray-500">
+                              {post.category.toUpperCase()} • {formatDate(post.createdAt)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleDeletePost(post.id, post.title)}
+                            disabled={deletingId === String(post.id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {deletingId === String(post.id) ? "Deleting..." : "Delete"}
+                          </Button>
+                        </div>
+                      ))}
                   </CardContent>
                 </Card>
               </motion.div>

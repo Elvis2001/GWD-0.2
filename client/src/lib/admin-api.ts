@@ -1,8 +1,17 @@
 import { buildApiUrl } from "./api";
 import { clearAdminToken, getAdminToken } from "./admin-auth";
 
+export type AdminPostSummary = {
+  id: string | number;
+  title: string;
+  category: string;
+  createdAt: string | null;
+  contentType?: "post" | "program" | "gallery";
+};
+
 type AdminPostPayload = {
   title: string;
+  name?: string;
   slug?: string;
   category: "flic" | "hubs" | "activities" | "blog";
   excerpt?: string;
@@ -27,6 +36,7 @@ function buildAuthHeaders(): HeadersInit {
 function appendPostFormData(formData: FormData, payload: AdminPostPayload): void {
   formData.append("title", payload.title);
   formData.append("category", payload.category);
+  if (payload.name) formData.append("name", payload.name);
   if (payload.slug) formData.append("slug", payload.slug);
   if (payload.excerpt) formData.append("excerpt", payload.excerpt);
   if (payload.content) formData.append("content", payload.content);
@@ -94,4 +104,35 @@ export async function createAdminProgram(payload: AdminPostPayload): Promise<unk
     );
   }
   return res.json();
+}
+
+export async function listAdminPosts(): Promise<AdminPostSummary[]> {
+  const res = await fetch(buildApiUrl("/api/posts"));
+  if (!res.ok) {
+    throw new Error("Failed to load posts");
+  }
+
+  const data = (await res.json()) as Array<Record<string, unknown>>;
+  return data.map((entry) => ({
+    id: entry.id as string | number,
+    title: (entry.title as string) ?? "",
+    category: (entry.category as string) ?? "",
+    createdAt: (entry.createdAt as string) ?? null,
+    contentType: entry.contentType as "post" | "program" | "gallery" | undefined,
+  }));
+}
+
+export async function deleteAdminPost(id: string): Promise<void> {
+  const res = await fetch(buildApiUrl(`/api/admin/post/${id}`), {
+    method: "DELETE",
+    headers: buildAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    throw await parseApiError(
+      res,
+      "Failed to delete post",
+      "Session expired or invalid. Please log in again.",
+    );
+  }
 }
