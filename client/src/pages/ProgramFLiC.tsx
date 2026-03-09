@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
 import { Link } from "wouter";
+import { useProgramsByCategory } from "@/hooks/use-content";
 import { 
   Check, 
   ArrowRight, 
@@ -73,26 +74,13 @@ export default function ProgramFLiC() {
     }
   ];
 
-  const activeSchools = [
-    {
-      name: "Suleiman Ribadu College, Yola",
-      location: "Bole Yolde Pate, Bako, Yola By-Pass Road, Adamawa State",
-      image: "https://i.pinimg.com/736x/34/14/d5/3414d580f6ae85033ff80825fb7f109a.jpg",
-      description: "Active FLiC participation with focus on entrepreneurship."
-    },
-    {
-      name: "KAHA International Academy, Yola",
-      location: "Jambutu, Yola, Adamawa State",
-      image: "https://i.pinimg.com/1200x/d7/fa/84/d7fa84b63eeafb825a0734ae1a1987a1.jpg",
-      description: "Established FLiC program with regular workshops."
-    },
-    {
-      name: "Arewa Achievers Academy, Yola",
-      location: "Mbamba, Rumde Jabbi, Yola South, Adamawa State",
-      image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2070&auto=format&fit=crop",
-      description: "Student-led finance clubs and peer mentoring."
-    }
-  ];
+  const { data: flicPrograms } = useProgramsByCategory("flic");
+  const activeSchools = (flicPrograms ?? []).map((program) => ({
+    name: program.title,
+    location: program.excerpt || "FLIC Program",
+    image: program.thumbnailImage || program.coverImage,
+    description: program.content || "Program details",
+  }));
 
   const howItWorks = [
     {
@@ -401,8 +389,8 @@ export default function ProgramFLiC() {
                   <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                     {school.description}
                   </p>
-                  <Link 
-                    href="/gallery" 
+                  <Link
+                    href="/gallery/flic"
                     className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:gap-3 transition-all"
                   >
                     View Details <ExternalLink className="w-4 h-4" />
@@ -410,6 +398,11 @@ export default function ProgramFLiC() {
                 </div>
               </motion.div>
             ))}
+            {activeSchools.length === 0 && (
+              <p className="col-span-3 text-center text-muted-foreground py-12">
+                No FLIC success stories have been published yet.
+              </p>
+            )}
           </div>
         </section>
 

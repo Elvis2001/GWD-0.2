@@ -1,22 +1,25 @@
+import "dotenv/config";
+
 import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import { registerRoutes } from "./routes";
 
-dotenv.config();
 
 const app = express();
 const frontendUrl = process.env.FRONTEND_URL;
 if (!frontendUrl) {
   throw new Error("FRONTEND_URL environment variable must be set.");
 }
+const normalizedFrontendUrl = frontendUrl.startsWith("http")
+  ? frontendUrl
+  : `https://${frontendUrl}`;
 
 app.use(express.json());
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: [normalizedFrontendUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
   }),
 );

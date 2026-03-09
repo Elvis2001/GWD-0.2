@@ -1,18 +1,40 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { buildApiUrl } from "@/lib/api";
-import type { ApiError, GalleryItem, InsertContactMessage, Post, TeamMember, Testimonial } from "@shared/types";
+import type {
+  ApiError,
+  InsertContactMessage,
+  Post,
+  TeamMember,
+  Testimonial,
+  CmsProgram,
+} from "@shared/types";
 
 const api = {
   posts: "/api/posts",
   postBySlug: "/api/posts/:slug",
   team: "/api/team",
   gallery: "/api/gallery",
+  galleryByCategory: "/api/gallery/:category",
+  programsByCategory: "/api/programs/:category",
+  programById: "/api/program/:id",
   testimonials: "/api/testimonials",
   contact: "/api/contact",
 } as const;
 
 function buildPostUrl(slug: string): string {
   return buildApiUrl(api.postBySlug.replace(":slug", encodeURIComponent(slug)));
+}
+
+function buildGalleryByCategoryUrl(category: string): string {
+  return buildApiUrl(api.galleryByCategory.replace(":category", encodeURIComponent(category)));
+}
+
+function buildProgramsByCategoryUrl(category: string): string {
+  return buildApiUrl(api.programsByCategory.replace(":category", encodeURIComponent(category)));
+}
+
+function buildProgramByIdUrl(id: string): string {
+  return buildApiUrl(api.programById.replace(":id", encodeURIComponent(id)));
 }
 
 // Posts
@@ -59,8 +81,45 @@ export function useGallery() {
     queryFn: async () => {
       const res = await fetch(buildApiUrl(api.gallery), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch gallery items");
-      return (await res.json()) as GalleryItem[];
+      return (await res.json()) as Post[];
     },
+  });
+}
+
+export function useGalleryByCategory(category: string) {
+  return useQuery({
+    queryKey: [api.galleryByCategory, category],
+    queryFn: async () => {
+      const res = await fetch(buildGalleryByCategoryUrl(category), { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch category gallery");
+      return (await res.json()) as Post[];
+    },
+    enabled: !!category,
+  });
+}
+
+export function useProgramsByCategory(category: string) {
+  return useQuery({
+    queryKey: [api.programsByCategory, category],
+    queryFn: async () => {
+      const res = await fetch(buildProgramsByCategoryUrl(category), { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch programs");
+      return (await res.json()) as CmsProgram[];
+    },
+    enabled: !!category,
+  });
+}
+
+export function useProgramById(id: string) {
+  return useQuery({
+    queryKey: [api.programById, id],
+    queryFn: async () => {
+      const res = await fetch(buildProgramByIdUrl(id), { credentials: "include" });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("Failed to fetch program");
+      return (await res.json()) as CmsProgram;
+    },
+    enabled: !!id,
   });
 }
 

@@ -1,14 +1,28 @@
 export interface Post {
-  id: number;
+  id: number | string;
   title: string;
   slug: string;
+  category: string;
   excerpt: string;
   content: string;
+  thumbnailImage?: string;
   coverImage: string;
+  galleryImages?: string[];
+  featured?: boolean;
+  published?: boolean;
   author: string;
-  category: string;
+  name?: string;
+  role?: string;
+  imageUrl?: string;
+  impactReport?: string;
+  keyActivities?: string[];
+  contentType?: "post" | "program" | "gallery";
   createdAt: Date | string | null;
+  updatedAt?: Date | string | null;
 }
+
+export type CmsPost = Post;
+export type CmsProgram = Post & { contentType: "program" };
 
 export interface TeamMember {
   id: number;
@@ -20,7 +34,7 @@ export interface TeamMember {
 }
 
 export interface GalleryItem {
-  id: number;
+  id: number | string;
   title: string;
   category: string;
   imageUrl: string;

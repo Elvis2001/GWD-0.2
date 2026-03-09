@@ -13,5 +13,5 @@
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["index.ts", "routes.ts", "storage.ts", "modules.d.ts"]
+  "include": ["**/*.ts", "modules.d.ts"]
 }

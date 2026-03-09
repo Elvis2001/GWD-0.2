@@ -4,61 +4,91 @@ import { motion } from "framer-motion";
 import { Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { clearAdminToken, getAdminToken, isAdminLoggedIn, setAdminToken } from "@/lib/admin-auth";
 
-/**
- * ADMIN AUTHENTICATION LOGIC (LOCALSTORAGE & CONTEXT SUGGESTION)
- * 
- * 1. REAL IMPLEMENTATION:
- *    - Use a dedicated AuthContext to wrap the application (or at least /admin routes).
- *    - On Login: Call backend API `/api/admin/login`, receive a JWT token.
- *    - Store JWT in an HttpOnly cookie (most secure) or Secure LocalStorage.
- *    - Redirect to `/admin/dashboard`.
- * 
- * 2. ROUTE PROTECTION:
- *    - Create a ProtectedRoute component that checks for the presence of a valid session/token.
- *    - If no session, redirect to `/admin/login`.
- * 
- * 3. CURRENT DUMMY LOGIC:
- *    - Checks LocalStorage for 'gwd_admin_auth' key.
- *    - Validates against hardcoded: admin@gwd.com.ng / admin123.
- */
+function getLoginErrorDescription(error: { code?: string; message?: string } | null): string {
+  const normalizedCode = error?.code?.toLowerCase();
+  const normalizedMessage = error?.message?.toLowerCase() ?? "";
+
+  if (normalizedCode === "email_not_confirmed" || normalizedMessage.includes("email not confirmed")) {
+    return "Your email is not confirmed yet. Check your inbox and confirm your account first.";
+  }
+
+  if (
+    normalizedCode === "invalid_credentials" ||
+    normalizedMessage.includes("invalid login credentials") ||
+    normalizedMessage.includes("invalid email or password")
+  ) {
+    return "Invalid email or password for this Supabase project. Verify the account exists in Supabase Auth and try again.";
+  }
+
+  if (normalizedCode === "invalid_api_key" || normalizedMessage.includes("invalid api key")) {
+    return "Supabase API key is invalid. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in client/.env.";
+  }
+
+  return error?.message || "Invalid email or password.";
+}
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const auth = localStorage.getItem("gwd_admin_auth");
-    if (auth === "true") {
+    const validateStoredToken = async () => {
+      if (!isAdminLoggedIn()) return;
+      const token = getAdminToken();
+      if (!token) return;
+
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        clearAdminToken();
+        return;
+      }
+
       setLocation("/admin/dashboard");
-    }
+    };
+
+    void validateStoredToken();
   }, [setLocation]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (email === "admin@gwd.com.ng" && password === "admin123") {
-      localStorage.setItem("gwd_admin_auth", "true");
-      toast({
-        title: "Access Granted",
-        description: "Welcome back, Admin.",
-      });
-      setLocation("/admin/dashboard");
-    } else {
+    setLoading(true);
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    if (error || !data.session?.access_token) {
       toast({
         title: "Access Denied",
-        description: "Invalid email or password.",
+        description: getLoginErrorDescription(error),
         variant: "destructive",
       });
+      setLoading(false);
+      return;
     }
+
+    setAdminToken(data.session.access_token);
+    toast({
+      title: "Access Granted",
+      description: "Welcome back, Admin.",
+    });
+    setLocation("/admin/dashboard");
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-10 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -110,13 +140,16 @@ export default function AdminLogin() {
 
               <Button 
                 type="submit" 
+                disabled={loading}
                 className="w-full h-14 rounded-2xl bg-primary hover:bg-green-600 text-lg font-bold shadow-lg shadow-primary/20 transition-all group"
               >
-                Sign In <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                {loading ? "Signing In..." : "Sign In"}{" "}
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>
           </CardContent>
         </Card>
+
       </motion.div>
     </div>
   );

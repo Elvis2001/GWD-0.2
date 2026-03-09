@@ -1,120 +1,287 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { 
-  Image as ImageIcon, 
-  Plus, 
-  Newspaper, 
-  GraduationCap, 
-  School, 
-  Gamepad2,
-  Upload,
-  LayoutDashboard,
-  Save,
-  LogOut,
-  Sparkles
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { GraduationCap, School, Newspaper, Gamepad2, LogOut, Save, LayoutDashboard, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { clearAdminToken, getAdminToken, isAdminLoggedIn } from "@/lib/admin-auth";
+import {
+  createAdminPost,
+  createAdminProgram,
+  deleteAdminPost,
+  listAdminPosts,
+  type AdminPostSummary,
+} from "@/lib/admin-api";
+import { supabase } from "@/lib/supabase";
 
-/**
- * SMART CONTENT PUBLISHING LOGIC (ARCHITECTURAL OVERVIEW)
- * 
- * When 'Publish' is clicked, the application should:
- * 1. If Category = FLICs:
- *    - Update `posts` or `success_stories` table in DB.
- *    - Update `gallery_items` with category 'flic'.
- *    - This triggers a cache invalidation on the frontend via React Query ['/api/flics', '/api/gallery'].
- * 
- * 2. If Category = HUBs:
- *    - Update `hubs` table.
- *    - Add to `success_stories` for homepage display.
- *    - Add to `gallery_items` with category 'hubs'.
- * 
- * 3. If Category = Games:
- *    - Update `games_activities` table.
- *    - Add to `gallery_items` with category 'games'.
- */
+type Category = "flic" | "hubs" | "activities" | "blog";
+
+type FormState = {
+  title: string;
+  name: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  impactReport: string;
+  keyActivities: string;
+  thumbnail: File | null;
+  gallery: File[];
+};
+
+const emptyForm: FormState = {
+  title: "",
+  name: "",
+  excerpt: "",
+  content: "",
+  author: "",
+  impactReport: "",
+  keyActivities: "",
+  thumbnail: null,
+  gallery: [],
+};
+
+type FieldCopy = {
+  title: string;
+  name: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  impactReport: string;
+  keyActivities: string;
+  thumbnailLabel: string;
+  galleryLabel: string;
+};
+
+const sectionLabel: Record<Category, string> = {
+  flic: "FLIC",
+  hubs: "HUBS",
+  activities: "ACTIVITIES",
+  blog: "BLOG",
+};
 
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState<Category>("flic");
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [posts, setPosts] = useState<AdminPostSummary[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const auth = localStorage.getItem("gwd_admin_auth");
-    if (auth !== "true") {
-      setLocation("/admin/login");
-    } else {
-      setIsLoaded(true);
-    }
+    const validateToken = async () => {
+      if (!isAdminLoggedIn()) {
+        setLocation("/admin");
+        return;
+      }
+
+      const token = getAdminToken();
+      if (!token) {
+        setLocation("/admin");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        clearAdminToken();
+        setLocation("/admin");
+      }
+    };
+
+    void validateToken();
   }, [setLocation]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("gwd_admin_auth");
-    setLocation("/admin/login");
-    toast({ title: "Logged Out", description: "You have been securely logged out." });
-  };
-
-  const handleUpload = (section: string) => {
-    toast({
-      title: "Success",
-      description: `New ${section} entry added and frontend updated (Dummy Logic)`,
-      variant: "default",
-    });
-  };
-
-  if (!isLoaded) return null;
-
-  const UploadSection = ({ title, description, icon, fields, section }: any) => (
-    <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm rounded-[2rem]">
-      <CardHeader>
-        <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-            {icon}
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-black">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid gap-6">
-          {fields.map((field: any, i: number) => (
-            <div key={i} className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">{field.label}</label>
-              {field.type === "textarea" ? (
-                <Textarea placeholder={field.placeholder} className="rounded-2xl border-gray-100 bg-white/80 focus:ring-primary h-32" />
-              ) : field.type === "file" ? (
-                <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer bg-white/50 hover:bg-white/80 transition-colors group">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 text-gray-400 mb-2 group-hover:text-primary transition-colors" />
-                      <p className="text-sm text-gray-500">Click to upload image</p>
-                    </div>
-                    <input type="file" className="hidden" multiple={field.multiple} />
-                  </label>
-                </div>
-              ) : (
-                <Input type={field.type} placeholder={field.placeholder} className="rounded-2xl border-gray-100 bg-white/80 focus:ring-primary h-12" />
-              )}
-            </div>
-          ))}
-        </div>
-        <Button 
-          onClick={() => handleUpload(section)}
-          className="w-full h-14 rounded-2xl bg-primary hover:bg-green-600 text-lg font-bold shadow-lg shadow-primary/20 transition-all"
-        >
-          <Save className="mr-2 w-5 h-5" /> Publish & Update Website
-        </Button>
-      </CardContent>
-    </Card>
+  const config = useMemo(
+    () => ({
+      flic: { title: "FLIC", description: "Creates FLIC program posts and gallery content." },
+      hubs: { title: "Hubs", description: "Creates HUB program posts and gallery content." },
+      activities: {
+        title: "Financial Literacy Activities",
+        description: "Creates activity program posts and gallery content.",
+      },
+      blog: { title: "Blogs & News", description: "Creates public blog/news posts." },
+    }),
+    [],
   );
+
+  const fieldCopy = useMemo<Record<Category, FieldCopy>>(
+    () => ({
+      flic: {
+        title: "e.g. FLIC Cohort 2026: School Launch in Lagos",
+        name: "e.g. Government Girls Secondary School, Surulere",
+        excerpt: "One-sentence summary of the workshop, school, and key outcome.",
+        content:
+          "Write full FLIC report: school context, what students learned, and measurable outcome.",
+        author: "Program lead name (e.g. Jane Doe)",
+        impactReport: "Impact snapshot (e.g. 120 students trained, 3 schools reached).",
+        keyActivities: "Comma-separated (e.g. budgeting basics, savings challenge, Q&A)",
+        thumbnailLabel: "FLIC cover image",
+        galleryLabel: "FLIC activity photos (optional)",
+      },
+      hubs: {
+        title: "e.g. HUB Workshop: Digital Skills for Youth Leaders",
+        name: "e.g. Abuja Youth Innovation Hub",
+        excerpt: "Short summary of the HUB topic, participants, and result.",
+        content:
+          "Describe the HUB session in detail: objective, sessions delivered, and outcomes.",
+        author: "Facilitator or coordinator name",
+        impactReport: "Impact snapshot (e.g. 45 participants, 2 prototypes built).",
+        keyActivities: "Comma-separated (e.g. design sprint, mentorship circle, demo day)",
+        thumbnailLabel: "HUB cover image",
+        galleryLabel: "HUB session photos (optional)",
+      },
+      activities: {
+        title: "e.g. Financial Literacy Activity: Campus Budget Bootcamp",
+        name: "Optional activity venue/group name",
+        excerpt: "Brief summary of the activity and participant takeaway.",
+        content:
+          "Write activity details: setup, engagement format, and what changed after the session.",
+        author: "Activity owner name",
+        impactReport: "Impact snapshot (e.g. 80 attendees, 60% improved quiz score).",
+        keyActivities: "Comma-separated (e.g. spending audit, goal planning, reflection)",
+        thumbnailLabel: "Activity cover image",
+        galleryLabel: "Activity photos (optional)",
+      },
+      blog: {
+        title: "e.g. How Youth Can Build Better Money Habits in 2026",
+        name: "Optional series name",
+        excerpt: "SEO-friendly summary for homepage/blog cards (1-2 sentences).",
+        content:
+          "Write the article body: intro, key points, examples, and conclusion.",
+        author: "Author byline (e.g. GWD Editorial Team)",
+        impactReport: "Optional: include supporting metric or citation summary.",
+        keyActivities: "Optional tags, comma-separated (e.g. savings, students, budgeting)",
+        thumbnailLabel: "Blog cover image",
+        galleryLabel: "Additional blog images (optional)",
+      },
+    }),
+    [],
+  );
+
+  const handleLogout = () => {
+    clearAdminToken();
+    setLocation("/admin");
+    toast({ title: "Logged Out", description: "Session ended." });
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as Category);
+    setForm(emptyForm);
+  };
+
+  const loadPosts = async () => {
+    setLoadingPosts(true);
+    try {
+      const rows = await listAdminPosts();
+      setPosts(rows);
+    } catch (error) {
+      toast({
+        title: "Could not load posts",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadPosts();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!form.title.trim()) {
+      toast({ title: "Missing title", description: "Title is required.", variant: "destructive" });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        title: form.title,
+        name: form.name.trim() || undefined,
+        category: activeTab,
+        excerpt: form.excerpt,
+        content: form.content,
+        author: form.author,
+        impactReport: form.impactReport,
+        keyActivities: form.keyActivities
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+        thumbnail: form.thumbnail,
+        gallery: form.gallery,
+        featured: activeTab === "flic" || activeTab === "hubs",
+        published: true,
+      } as const;
+
+      if (activeTab === "blog") {
+        await createAdminPost(payload);
+      } else {
+        await createAdminProgram(payload);
+      }
+
+      toast({
+        title: "Published",
+        description: `${config[activeTab].title} content published successfully.`,
+      });
+      setForm(emptyForm);
+      await loadPosts();
+    } catch (error) {
+      toast({
+        title: "Publish failed",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeletePost = async (id: string | number, title: string) => {
+    const confirmed = window.confirm(`Delete "${title}"?`);
+    if (!confirmed) return;
+
+    const postId = String(id);
+    setDeletingId(postId);
+    try {
+      await deleteAdminPost(postId);
+      setPosts((prev) => prev.filter((post) => String(post.id) !== postId));
+      toast({ title: "Deleted", description: "Post removed successfully." });
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const filteredPosts = useMemo(
+    () =>
+      posts
+        .filter((post) => post.category.toLowerCase() === activeTab)
+        .sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+    [activeTab, posts],
+  );
+
+  const formatDate = (value: string | null): string => {
+    if (!value) return "Unknown date";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "Unknown date";
+    return parsed.toLocaleDateString();
+  };
 
   return (
     <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
@@ -122,93 +289,171 @@ export default function AdminDashboard() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
           <div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight flex items-center gap-4">
-              <LayoutDashboard className="w-10 h-10 text-primary" /> Admin <span className="text-primary">Console</span>
+              <LayoutDashboard className="w-10 h-10 text-primary" /> Admin Console
             </h1>
-            <p className="text-gray-500 mt-2 font-medium">Smart Content Publishing Hub</p>
+            <p className="text-gray-500 mt-2 font-medium">Hello there admin</p>
           </div>
-          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-            <div className="px-4 py-2 bg-green-50 text-green-600 rounded-xl text-sm font-bold">System Online</div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-10 h-10 rounded-full hover:bg-red-50 hover:text-red-500">
-              <LogOut className="w-5 h-5" />
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={handleLogout} className="rounded-full hover:text-red-500">
+            <LogOut className="w-5 h-5 mr-2" /> Logout
+          </Button>
         </div>
 
-        <Tabs defaultValue="flic" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="bg-white p-1 rounded-2xl shadow-sm border border-gray-100 mb-12 flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="flic" className="rounded-xl px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-              <GraduationCap className="w-4 h-4 mr-2" /> FLiC Schools
+            <TabsTrigger value="flic" className="rounded-xl px-6 py-3 font-bold">
+              <GraduationCap className="w-4 h-4 mr-2" /> FLIC
             </TabsTrigger>
-            <TabsTrigger value="hubs" className="rounded-xl px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-              <School className="w-4 h-4 mr-2" /> HUBs & Tech
+            <TabsTrigger value="hubs" className="rounded-xl px-6 py-3 font-bold">
+              <School className="w-4 h-4 mr-2" /> Hubs
             </TabsTrigger>
-            <TabsTrigger value="blog" className="rounded-xl px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-              <Newspaper className="w-4 h-4 mr-2" /> Blog & News
+            <TabsTrigger value="activities" className="rounded-xl px-6 py-3 font-bold">
+              <Gamepad2 className="w-4 h-4 mr-2" /> Financial Literacy Activities
             </TabsTrigger>
-            <TabsTrigger value="games" className="rounded-xl px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-              <Gamepad2 className="w-4 h-4 mr-2" /> Games & Activities
+            <TabsTrigger value="blog" className="rounded-xl px-6 py-3 font-bold">
+              <Newspaper className="w-4 h-4 mr-2" /> Blogs & News
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="flic">
-            <UploadSection 
-              title="FLiC Schools & Success"
-              description="Posts here update Homepage Success Stories, FLiC Page, and FLiC Gallery."
-              icon={<GraduationCap className="w-6 h-6" />}
-              section="FLiC"
-              fields={[
-                { label: "School Name", type: "text", placeholder: "e.g., Jimeta Secondary School" },
-                { label: "Impact Summary", type: "text", placeholder: "e.g., 90% Financial Literacy Score" },
-                { label: "Detailed Story", type: "textarea", placeholder: "Write the full story here..." },
-                { label: "Gallery Photos", type: "file", multiple: true }
-              ]}
-            />
-          </TabsContent>
+          {(["flic", "hubs", "activities", "blog"] as Category[]).map((category) => (
+            <TabsContent key={category} value={category}>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <Card className="border-none shadow-xl bg-white rounded-[2rem]">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-black">{config[category].title}</CardTitle>
+                    <CardDescription>{config[category].description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Title</label>
+                    <Input
+                      placeholder={fieldCopy[activeTab].title}
+                      value={form.title}
+                      onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                    />
+                    </div>
+                    {(activeTab === "flic" || activeTab === "hubs") && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold">
+                          {activeTab === "flic" ? "School Name" : "Hub Name"}
+                        </label>
+                        <Input
+                          placeholder={fieldCopy[activeTab].name}
+                          value={form.name}
+                          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Excerpt</label>
+                    <Input
+                      placeholder={fieldCopy[activeTab].excerpt}
+                      value={form.excerpt}
+                      onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+                    />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Content</label>
+                    <Textarea
+                      placeholder={fieldCopy[activeTab].content}
+                      value={form.content}
+                      onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+                      className="h-40"
+                    />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Author</label>
+                    <Input
+                      placeholder={fieldCopy[activeTab].author}
+                      value={form.author}
+                      onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
+                    />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Impact Report</label>
+                    <Input
+                      placeholder={fieldCopy[activeTab].impactReport}
+                      value={form.impactReport}
+                      onChange={(e) => setForm((prev) => ({ ...prev, impactReport: e.target.value }))}
+                    />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{sectionLabel[activeTab]} Key Activities</label>
+                    <Input
+                      placeholder={fieldCopy[activeTab].keyActivities}
+                      value={form.keyActivities}
+                      onChange={(e) => setForm((prev) => ({ ...prev, keyActivities: e.target.value }))}
+                    />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{fieldCopy[activeTab].thumbnailLabel}</label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, thumbnail: e.target.files?.[0] ?? null }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{fieldCopy[activeTab].galleryLabel}</label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            gallery: Array.from(e.target.files ?? []),
+                          }))
+                        }
+                      />
+                    </div>
+                    <Button onClick={handleSubmit} disabled={submitting} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      {submitting ? "Publishing..." : "Publish"}
+                    </Button>
+                  </CardContent>
+                </Card>
 
-          <TabsContent value="hubs">
-            <UploadSection 
-              title="HUBs & Tech Bootcamps"
-              description="Posts here update Homepage Success Stories, HUBs Page, and HUB Gallery."
-              icon={<School className="w-6 h-6" />}
-              section="HUB"
-              fields={[
-                { label: "Institution/Hub Name", type: "text", placeholder: "e.g., AUN Innovation Hub" },
-                { label: "Focus Area", type: "text", placeholder: "e.g., AI & Digital Skills" },
-                { label: "Achievement Details", type: "textarea", placeholder: "Describe the hub's milestones..." },
-                { label: "Hub Photos", type: "file", multiple: true }
-              ]}
-            />
-          </TabsContent>
-
-          <TabsContent value="blog">
-            <UploadSection 
-              title="Blog & Latest News"
-              description="Posts here update the Blog page and Homepage Latest Updates."
-              icon={<Newspaper className="w-6 h-6" />}
-              section="Blog Post"
-              fields={[
-                { label: "Headline", type: "text", placeholder: "e.g., GWDYF Empowers 500 Youth" },
-                { label: "Short Excerpt", type: "text", placeholder: "Summary for card view..." },
-                { label: "Full Article Content", type: "textarea", placeholder: "Write your article..." },
-                { label: "Cover Image", type: "file", multiple: false }
-              ]}
-            />
-          </TabsContent>
-
-          <TabsContent value="games">
-            <UploadSection 
-              title="Financial Literacy Games"
-              description="Posts here update the Games Section and Games Gallery."
-              icon={<Gamepad2 className="w-6 h-6" />}
-              section="Game Activity"
-              fields={[
-                { label: "Activity Title", type: "text", placeholder: "e.g., The Savings Challenge 2024" },
-                { label: "Category", type: "text", placeholder: "e.g., School Games / Interactive Workshop" },
-                { label: "Game Description", type: "textarea", placeholder: "Describe the activity..." },
-                { label: "Activity Photos", type: "file", multiple: true }
-              ]}
-            />
-          </TabsContent>
+                <Card className="border-none shadow-xl bg-white rounded-[2rem] mt-8">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-black">
+                      Manage {config[category].title} Posts
+                    </CardTitle>
+                    <CardDescription>Delete previously published items for this section.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {loadingPosts && <p className="text-sm text-gray-500">Loading posts...</p>}
+                    {!loadingPosts && filteredPosts.length === 0 && (
+                      <p className="text-sm text-gray-500">No published items yet.</p>
+                    )}
+                    {!loadingPosts &&
+                      filteredPosts.map((post) => (
+                        <div
+                          key={String(post.id)}
+                          className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl border border-gray-100"
+                        >
+                          <div>
+                            <p className="font-semibold text-gray-900">{post.title}</p>
+                            <p className="text-xs text-gray-500">
+                              {post.category.toUpperCase()} • {formatDate(post.createdAt)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleDeletePost(post.id, post.title)}
+                            disabled={deletingId === String(post.id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {deletingId === String(post.id) ? "Deleting..." : "Delete"}
+                          </Button>
+                        </div>
+                      ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
     </div>
