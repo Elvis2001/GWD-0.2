@@ -1,4 +1,4 @@
-# GWD Youth Foundation Monorepo
+# GWD Youth Foundation Dual-orepo
 
 This repository is split for independent frontend and backend deployment:
 
