@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowRight, Users, BookOpen, Trophy, Globe } from "lucide-react";
+import { ArrowRight, Users, BookOpen, Trophy, Globe, Calendar } from "lucide-react";
 import { SectionHeader } from "@/components/SectionHeader";
 import { usePosts, useTestimonials } from "@/hooks/use-content";
 
@@ -375,6 +375,14 @@ export default function Home() {
                   <p className="text-muted-foreground line-clamp-2 text-sm">
                     {post.excerpt}
                   </p>
+                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
+                    <span>
+                      {post.createdAt
+                        ? `Posted ${new Date(post.createdAt).toLocaleDateString()}`
+                        : "Posted recently"}
+                    </span>
+                  </div>
                 </Link>
               ))
             ) : (

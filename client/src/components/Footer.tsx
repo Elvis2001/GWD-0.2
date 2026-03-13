@@ -36,16 +36,26 @@ export function Footer() {
               Empowering youth through financial literacy, leadership development, and digital skills for a sustainable future.
             </p>
             <div className="flex gap-4 pt-2">
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <a href="https://www.facebook.com/share/1E1VxzyQuq/"
+                 target="_blank" 
+                 rel="noopener noreferrer"
+               className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <a href="#"
+                target="_blank" 
+                rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <a href="https://www.instagram.com/grow_data/"
+                target="_blank" 
+                rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <a href="https://www.linkedin.com/company/grow-with-data-youths-foundation/" target="_blank" rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
                 <Linkedin className="w-5 h-5" />
               </a>
             </div>
@@ -80,15 +90,16 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-gray-400 text-sm">123 Foundation Way, Youth Center Building, City, Country</span>
+                <span className="text-gray-400 text-sm">6G22+57G, 99 Lamido Zubairu Way,<br/> 
+                      Yola Bypass, Wuro Hausa, Yola 640101</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-gray-400 text-sm">+1 (234) 567-8900</span>
+                <span className="text-gray-400 text-sm">(+234) 906-907-1154</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-gray-400 text-sm">info@gwdyf.org</span>
+                <span className="text-gray-400 text-sm">finlit@gwd.com.ng</span>
               </li>
             </ul>
           </div>

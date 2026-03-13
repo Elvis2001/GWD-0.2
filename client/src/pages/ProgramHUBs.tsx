@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Cpu,
   HeartHandshake,
-  ArrowRight
+  ArrowRight,
+  Calendar
 } from "lucide-react";
 import { Link } from "wouter";
 import { useProgramsByCategory } from "@/hooks/use-content";
@@ -27,6 +28,7 @@ export default function ProgramHUBs() {
     students: "Participants",
     color: ["border-blue-500", "border-amber-500", "border-green-500", "border-purple-500"][i % 4],
     id: program.id,
+    createdAt: program.createdAt,
   }));
 
   const features = [
@@ -105,6 +107,12 @@ export default function ProgramHUBs() {
                       <Users className="w-4 h-4 text-secondary" />
                       <span className="text-sm font-medium text-gray-600">Students: {inst.students}</span>
                     </div>
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-4 h-4 text-secondary" />
+                      <span className="text-sm font-medium text-gray-600">
+                        Posted: {inst.createdAt ? new Date(inst.createdAt).toLocaleDateString() : "Recent"}
+                      </span>
+                    </div>
                   </div>
                   <Link href={`/details/hubs/${inst.id}`}>
                     <Button variant="outline" className="rounded-full w-full group py-6 border-2 border-primary/20 hover:border-primary hover:bg-primary/5">
@@ -143,7 +151,7 @@ export default function ProgramHUBs() {
                 </div>
                 <h3 className="font-bold text-lg mb-3 leading-tight">{prog.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">{prog.desc}</p>
-                <Link href="/contact" className="text-primary font-bold text-sm hover:underline">Learn More</Link>
+      
               </motion.div>
             ))}
           </div>
