@@ -4,7 +4,7 @@ This repository is split for independent frontend and backend deployment:
 
 - `client/`: React + Vite app (deploy to Vercel)
 - `server/`: Express API (deploy to Render)
-- `shared/`: shared TypeScript types only
+- `shared/`: shared TypeScript types only.
 
 Frontend and backend communicate through environment variables, not hardcoded URLs.
 
