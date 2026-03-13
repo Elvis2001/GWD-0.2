@@ -47,7 +47,7 @@ export function Navbar() {
             "font-bold text-2xl tracking-tighter transition-colors",
             scrolled ? "text-primary" : "text-white"
           )}>
-            GWD<span className="text-secondary">YF</span>
+            <img src="gwdlogox66x550xhr.png" alt="GWDYF Logo" className="h-10 w-auto" />
           </div>
         </Link>
 

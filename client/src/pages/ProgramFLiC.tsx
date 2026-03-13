@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Clock,
   Trophy,
+  Calendar,
   Target as TargetIcon
 } from "lucide-react";
 
@@ -80,6 +81,7 @@ export default function ProgramFLiC() {
     location: program.excerpt || "FLIC Program",
     image: program.thumbnailImage || program.coverImage,
     description: program.content || "Program details",
+    createdAt: program.createdAt,
   }));
 
   const howItWorks = [
@@ -189,7 +191,7 @@ export default function ProgramFLiC() {
                       Our curriculum is brought to life through a diverse mix of engaging activities designed for maximum retention and fun.
                     </p>
                     <div className="grid grid-cols-2 gap-3">
-                      {["Lectures", "Worksheets", "Online Games", "Board Games", "Field Trips", "Group Projects"].map((activity, idx) => (
+                      {["Interactive sessions", "Worksheets", "Flic Games", "Personality tests", "Field Trips", "Group Projects"].map((activity, idx) => (
                         <div key={idx} className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
                           <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
                           <span className="text-sm font-medium text-gray-700">{activity}</span>
@@ -381,9 +383,15 @@ export default function ProgramFLiC() {
                   </div>
                 </div>
                 <div className="p-8">
-                  <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-3">
-                    <School className="w-4 h-4" />
-                    Active Club
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+                      <School className="w-4 h-4" />
+                      Active Club
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-gray-500">
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      {school.createdAt ? new Date(school.createdAt).toLocaleDateString() : "Recent"}
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-4">{school.name}</h3>
                   <p className="text-gray-500 text-sm mb-6 leading-relaxed">
@@ -408,6 +416,7 @@ export default function ProgramFLiC() {
 
         <section className="bg-gray-50 rounded-[3rem] p-12 lg:p-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
+
             <div>
               <h2 className="text-3xl font-bold mb-6">How to Start a FLiC</h2>
               <p className="text-gray-600 mb-10 leading-relaxed">
@@ -415,9 +424,10 @@ export default function ProgramFLiC() {
               </p>
               <div className="space-y-6">
                 {[
-                  { title: "Requirements", desc: "A dedicated teacher coordinator and a minimum of 20 interested students." },
+                  { title: "Requirements", desc: "A minimum of 5-10 interested students" },
+                  { title: "Communication", desc: "Reach out to us to express interest and discuss implementation." },
                   { title: "Resources", desc: "We provide student workbooks, teacher guides, and interactive game kits." },
-                  { title: "Support", desc: "Continuous mentorship from our team and volunteer professionals." }
+                  { title: "Support", desc: "Continuous mentorship and training from our team and volunteer professionals." }
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -431,6 +441,8 @@ export default function ProgramFLiC() {
                 ))}
               </div>
             </div>
+
+            
             <div className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
               <h3 className="text-2xl font-bold mb-6">Inquiry Form</h3>
               <p className="text-gray-500 text-sm mb-8">Fill out the form below and our program coordinator will reach out to you.</p>

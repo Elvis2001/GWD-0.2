@@ -64,9 +64,8 @@ export default function Contact() {
                   <div>
                     <h4 className="font-bold text-gray-900">Our Office</h4>
                     <p className="text-gray-600 text-sm mt-1">
-                      123 Foundation Way<br />
-                      Youth Center Building<br />
-                      City, Country
+                      6G22+57G, 99 Lamido Zubairu Way,<br/> 
+                      Yola Bypass, Wuro Hausa, Yola 640101
                     </p>
                   </div>
                 </div>
@@ -78,7 +77,7 @@ export default function Contact() {
                   <div>
                     <h4 className="font-bold text-gray-900">Phone</h4>
                     <p className="text-gray-600 text-sm mt-1">
-                      +1 (234) 567-8900<br />
+                       (+234) 906-907-1154<br />
                       Mon-Fri, 9am - 5pm
                     </p>
                   </div>
@@ -91,8 +90,8 @@ export default function Contact() {
                   <div>
                     <h4 className="font-bold text-gray-900">Email</h4>
                     <p className="text-gray-600 text-sm mt-1">
-                      info@gwdyf.org<br />
-                      support@gwdyf.org
+                      finlit@gwd.com.ng<br />
+                      {/*support@gwdyf.org*/}
                     </p>
                   </div>
                 </div>
@@ -100,9 +99,19 @@ export default function Contact() {
             </div>
 
             {/* Map Placeholder */}
-            <div className="bg-gray-100 rounded-2xl h-64 w-full flex items-center justify-center text-gray-400 border border-gray-200">
-              <span className="font-medium">Map Integration</span>
+          
+            <div className="bg-gray-100 rounded-2xl h-64 w-full overflow-hidden border border-gray-200">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4055.086768661934!2d12.498738061217319!3d9.198667785098024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x10fc6c4ed4bd0a87%3A0xfb1bc21e14c04476!2sAUN%20Academy!5e0!3m2!1sen!2sng!4v1773234697367!5m2!1sen!2sng" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
+
           </div>
 
           {/* Contact Form */}

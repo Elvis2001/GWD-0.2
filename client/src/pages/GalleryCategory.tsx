@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
 import { SectionHeader } from "@/components/SectionHeader";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGalleryByCategory } from "@/hooks/use-content";
@@ -54,6 +54,14 @@ export default function GalleryCategory() {
                       {item.title}
                     </h3>
                     <p className="text-gray-500 text-sm leading-relaxed mb-8 flex-1">{item.excerpt}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      <span>
+                        {item.createdAt
+                          ? `Posted ${new Date(item.createdAt).toLocaleDateString()}`
+                          : "Posted recently"}
+                      </span>
+                    </div>
                     <Link href={`/details/${category}/${item.id}`}>
                       <Button className="w-full h-14 rounded-2xl bg-primary hover:bg-green-600 font-bold group">
                         View Full Details{" "}

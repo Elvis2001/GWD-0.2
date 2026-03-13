@@ -62,8 +62,8 @@ export default function About() {
     const inView = useInView(statsRef, { once: true });
 
     const stats = [
-      { label: "Students Reached", value: "10,000+", icon: <Users className="w-6 h-6" />, target: 10000, suffix: "+" },
-      { label: "Schools & Institutions", value: "50+", icon: <Landmark className="w-6 h-6" />, target: 50, suffix: "+" },
+      { label: "Students Reached", value: "10,000+", icon: <Users className="w-6 h-6" />, target: 8000, suffix: "+" },
+      { label: "Schools & Institutions", value: "50+", icon: <Landmark className="w-6 h-6" />, target: 25, suffix: "+" },
       { label: "Training Hours", value: "25,000+", icon: <Clock className="w-6 h-6" />, target: 25000, suffix: "+" },
       { label: "Partner Organizations", value: "15+", icon: <Globe className="w-6 h-6" />, target: 15, suffix: "+" },
       { label: "Active Yola Locations", value: "6", icon: <MapPin className="w-6 h-6" />, target: 6, suffix: "" },
