@@ -99,9 +99,11 @@ export default function ProgramHUBs() {
                 <div className="p-10 flex flex-col justify-center">
                   <h4 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">{inst.hubName}</h4>
                   <h3 className="text-2xl font-bold mb-2 leading-tight">{inst.title}</h3>
-                  <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
-                    {inst.name || "Name unavailable"}
-                  </p>
+                  {inst.name && (
+                    <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                      {inst.name}
+                    </p>
+                  )}
                   <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-3">
                       <Zap className="w-4 h-4 text-secondary" />
