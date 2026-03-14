@@ -77,7 +77,8 @@ export default function ProgramFLiC() {
 
   const { data: flicPrograms } = useProgramsByCategory("flic");
   const activeSchools = (flicPrograms ?? []).map((program) => ({
-    name: program.title,
+    title: program.title,
+    name: program.name,
     location: program.excerpt || "FLIC Program",
     image: program.thumbnailImage || program.coverImage,
     description: program.content || "Program details",
@@ -371,7 +372,7 @@ export default function ProgramFLiC() {
                 <div className="aspect-[4/3] overflow-hidden relative">
                   <img 
                     src={school.image} 
-                    alt={school.name}
+                    alt={school.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -393,7 +394,10 @@ export default function ProgramFLiC() {
                       {school.createdAt ? new Date(school.createdAt).toLocaleDateString() : "Recent"}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-4">{school.name}</h3>
+                  <h3 className="text-xl font-bold mb-2">{school.title}</h3>
+                  <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                    {school.name || "Name unavailable"}
+                  </p>
                   <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                     {school.description}
                   </p>

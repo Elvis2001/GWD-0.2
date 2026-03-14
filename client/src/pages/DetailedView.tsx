@@ -53,7 +53,10 @@ export default function DetailedView() {
               <ArrowLeft className="mr-2 w-4 h-4" /> Back
             </Button>
           </Link>
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-6">{item.title}</h1>
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-3">{item.title}</h1>
+          <p className="text-lg md:text-2xl font-semibold text-white/90 mb-6 leading-snug break-words">
+            {item.name || "Name unavailable"}
+          </p>
           <div className="flex items-center gap-2 text-gray-200">
             <Calendar className="w-5 h-5 text-primary" />
             <span className="font-medium">
