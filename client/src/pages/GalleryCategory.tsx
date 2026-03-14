@@ -53,9 +53,11 @@ export default function GalleryCategory() {
                     <h3 className="text-2xl font-black mb-2 group-hover:text-primary transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
-                      {item.name || "Name unavailable"}
-                    </p>
+                    {item.name && (
+                      <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                        {item.name}
+                      </p>
+                    )}
                     <p className="text-gray-500 text-sm leading-relaxed mb-8 flex-1">{item.excerpt}</p>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
                       <Calendar className="w-3.5 h-3.5 text-primary" />

@@ -50,9 +50,11 @@ export default function Blog() {
                       </div>
                     </div>
                     <h2 className="text-2xl font-bold mb-2 leading-tight">{post.title}</h2>
-                    <p className="text-base font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
-                      {post.name || "Name unavailable"}
-                    </p>
+                    {post.name && (
+                      <p className="text-base font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                        {post.name}
+                      </p>
+                    )}
                     <p className="text-gray-600 mb-8 leading-relaxed">{post.excerpt}</p>
                     <Link
                       href={`/details/blog/${post.id}`}

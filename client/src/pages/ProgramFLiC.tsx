@@ -395,9 +395,11 @@ export default function ProgramFLiC() {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold mb-2">{school.title}</h3>
-                  <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
-                    {school.name || "Name unavailable"}
-                  </p>
+                  {school.name && (
+                    <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                      {school.name}
+                    </p>
+                  )}
                   <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                     {school.description}
                   </p>
