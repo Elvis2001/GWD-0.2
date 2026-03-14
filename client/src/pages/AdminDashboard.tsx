@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { clearAdminToken, getAdminToken, isAdminLoggedIn } from "@/lib/admin-auth";
 import {
@@ -423,7 +424,11 @@ export default function AdminDashboard() {
                     <CardDescription>Delete previously published items for this section.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {loadingPosts && <p className="text-sm text-gray-500">Loading posts...</p>}
+                    {loadingPosts && (
+                      <div className="flex justify-center py-6">
+                        <Spinner size="sm" />
+                      </div>
+                    )}
                     {!loadingPosts && filteredPosts.length === 0 && (
                       <p className="text-sm text-gray-500">No published items yet.</p>
                     )}

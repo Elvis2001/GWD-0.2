@@ -3,6 +3,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { Link } from "wouter";
 import { ArrowRight, User, Calendar } from "lucide-react";
 import { usePosts } from "@/hooks/use-content";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Blog() {
   const { data: posts, isLoading } = usePosts();
@@ -18,7 +19,9 @@ export default function Blog() {
         />
 
         {isLoading ? (
-          <p className="text-center text-gray-500">Loading posts...</p>
+          <div className="flex justify-center py-16">
+            <Spinner />
+          </div>
         ) : (
           <div className="max-w-4xl mx-auto space-y-12">
             {blogPosts.map((post, i) => (

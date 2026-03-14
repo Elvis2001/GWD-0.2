@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGalleryByCategory } from "@/hooks/use-content";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function GalleryCategory() {
   const [, params] = useRoute("/gallery/:category");
@@ -23,11 +24,13 @@ export default function GalleryCategory() {
         <SectionHeader
           title={`${category.toUpperCase()} Gallery`}
           subtitle="Category"
-          description="Uploaded items from the admin dashboard."
+          description=""
         />
 
         {isLoading ? (
-          <p className="text-center text-gray-500">Loading gallery...</p>
+          <div className="flex justify-center py-16">
+            <Spinner />
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {(items ?? []).map((item, i) => (
