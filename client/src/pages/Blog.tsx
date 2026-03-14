@@ -49,7 +49,10 @@ export default function Blog() {
                         {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Recent"}
                       </div>
                     </div>
-                    <h2 className="text-2xl font-bold mb-4 leading-tight">{post.title}</h2>
+                    <h2 className="text-2xl font-bold mb-2 leading-tight">{post.title}</h2>
+                    <p className="text-base font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                      {post.name || "Name unavailable"}
+                    </p>
                     <p className="text-gray-600 mb-8 leading-relaxed">{post.excerpt}</p>
                     <Link
                       href={`/details/blog/${post.id}`}

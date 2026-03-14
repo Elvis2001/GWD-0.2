@@ -21,7 +21,8 @@ import { useProgramsByCategory } from "@/hooks/use-content";
 export default function ProgramHUBs() {
   const { data: hubPrograms } = useProgramsByCategory("hubs");
   const institutions = (hubPrograms ?? []).map((program, i) => ({
-    name: program.title,
+    title: program.title,
+    name: program.name,
     hubName: program.excerpt || "GWDYF Hub Program",
     focus: program.impactReport || "Innovation & Leadership",
     image: program.thumbnailImage || program.coverImage,
@@ -88,7 +89,7 @@ export default function ProgramHUBs() {
                 <div className="aspect-square sm:aspect-auto overflow-hidden relative">
                   <img 
                     src={inst.image} 
-                    alt={inst.name} 
+                    alt={inst.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-bold text-gray-900 flex items-center gap-2">
@@ -97,7 +98,10 @@ export default function ProgramHUBs() {
                 </div>
                 <div className="p-10 flex flex-col justify-center">
                   <h4 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">{inst.hubName}</h4>
-                  <h3 className="text-2xl font-bold mb-4 leading-tight">{inst.name}</h3>
+                  <h3 className="text-2xl font-bold mb-2 leading-tight">{inst.title}</h3>
+                  <p className="text-sm font-semibold text-gray-600 mb-4 line-clamp-2 break-words">
+                    {inst.name || "Name unavailable"}
+                  </p>
                   <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-3">
                       <Zap className="w-4 h-4 text-secondary" />

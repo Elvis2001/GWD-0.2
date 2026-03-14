@@ -369,9 +369,12 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
                     {post.title}
                   </h3>
+                  <p className="text-sm font-semibold text-gray-600 mb-2 line-clamp-1 break-words">
+                    {post.name || "Name unavailable"}
+                  </p>
                   <p className="text-muted-foreground line-clamp-2 text-sm">
                     {post.excerpt}
                   </p>

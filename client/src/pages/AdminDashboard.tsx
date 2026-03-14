@@ -125,7 +125,7 @@ export default function AdminDashboard() {
       },
       hubs: {
         title: "e.g. HUB Workshop: Digital Skills for Youth Leaders",
-        name: "e.g. Abuja Youth Innovation Hub",
+        name: "e.g. AUN Youth Innovation Hub",
         excerpt: "Short summary of the HUB topic, participants, and result.",
         content:
           "Describe the HUB session in detail: objective, sessions delivered, and outcomes.",
