@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
 import { 
-  Cpu, 
   Terminal, 
   Zap, 
   TrendingUp, 
@@ -10,14 +9,23 @@ import {
   ChevronLeft, 
   ChevronRight,
   BrainCircuit,
-  Rocket
+  Rocket,
+  Download,
+  ExternalLink,
+  FileText,
+  Calendar
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useProgramsByCategory } from "@/hooks/use-content";
+import { Spinner } from "@/components/ui/spinner";
+import { Link } from "wouter";
+import { buildApiUrl } from "@/lib/api";
 
 export default function ProgramAI() {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: resources, isLoading } = useProgramsByCategory("activities");
+  const pdfResources = (resources ?? []).filter((resource) => Boolean(resource.resourcePdfUrl));
 
   const programs = [
     {
@@ -82,6 +90,81 @@ export default function ProgramAI() {
           subtitle="Future Skills" 
           description="Preparing Nigerian youth for the AI revolution with practical skills in prompt engineering and artificial intelligence thereby aiding financial literacy."
         />
+        <section className="mb-24">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-black text-gray-900">Downloadable Resources</h2>
+              <p className="text-gray-600 mt-2">
+                Admin-uploaded PDF guides, worksheets, and learning materials.
+              </p>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-10">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pdfResources.map((resource) => (
+                <motion.div
+                  key={String(resource.id)}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{resource.title}</h3>
+                  <p className="text-sm text-gray-600 mb-5 line-clamp-3">{resource.excerpt || resource.content}</p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
+                    <span>
+                      {resource.createdAt ? new Date(resource.createdAt).toLocaleDateString() : "Recent"}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <Button asChild className="w-full">
+                      <a
+                        href={buildApiUrl(
+                          `/api/resources/${encodeURIComponent(String(resource.id))}/view`,
+                        )}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View PDF
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <a
+                        href={buildApiUrl(
+                          `/api/resources/${encodeURIComponent(String(resource.id))}/download`,
+                        )}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </a>
+                    </Button>
+                    <Link
+                      href={`/details/activities/${resource.id}`}
+                      className="inline-flex items-center justify-center w-full text-sm font-semibold text-primary"
+                    >
+                      Open Details
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+              {pdfResources.length === 0 && (
+                <p className="col-span-3 text-center text-muted-foreground py-10">
+                  No PDF resources have been published yet.
+                </p>
+              )}
+            </div>
+          )}
+        </section>
 
         {/* Sliding Cards Container */}
         <div className="relative group mb-20">

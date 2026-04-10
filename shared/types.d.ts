@@ -15,6 +15,8 @@ export interface Post {
   role?: string;
   imageUrl?: string;
   impactReport?: string;
+  resourcePdfUrl?: string;
+  resourcePdfName?: string;
   keyActivities?: string[];
   contentType?: "post" | "program" | "gallery";
   createdAt: Date | string | null;

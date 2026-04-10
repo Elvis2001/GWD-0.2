@@ -31,6 +31,7 @@ type FormState = {
   keyActivities: string;
   thumbnail: File | null;
   gallery: File[];
+  resourcePdf: File | null;
 };
 
 const emptyForm: FormState = {
@@ -43,6 +44,7 @@ const emptyForm: FormState = {
   keyActivities: "",
   thumbnail: null,
   gallery: [],
+  resourcePdf: null,
 };
 
 type FieldCopy = {
@@ -55,6 +57,7 @@ type FieldCopy = {
   keyActivities: string;
   thumbnailLabel: string;
   galleryLabel: string;
+  resourcePdfLabel: string;
 };
 
 const sectionLabel: Record<Category, string> = {
@@ -123,6 +126,7 @@ export default function AdminDashboard() {
         keyActivities: "Comma-separated (e.g. budgeting basics, savings challenge, Q&A)",
         thumbnailLabel: "FLIC cover image",
         galleryLabel: "FLIC activity photos (optional)",
+        resourcePdfLabel: "Attach resource PDF (optional)",
       },
       hubs: {
         title: "e.g. HUB Workshop: Digital Skills for Youth Leaders",
@@ -135,6 +139,7 @@ export default function AdminDashboard() {
         keyActivities: "Comma-separated (e.g. design sprint, mentorship circle, demo day)",
         thumbnailLabel: "HUB cover image",
         galleryLabel: "HUB session photos (optional)",
+        resourcePdfLabel: "Attach resource PDF (optional)",
       },
       activities: {
         title: "e.g. Financial Literacy Activity: Campus Budget Bootcamp",
@@ -147,6 +152,7 @@ export default function AdminDashboard() {
         keyActivities: "Comma-separated (e.g. spending audit, goal planning, reflection)",
         thumbnailLabel: "Activity cover image",
         galleryLabel: "Activity photos (optional)",
+        resourcePdfLabel: "Attach resource PDF (optional)",
       },
       blog: {
         title: "e.g. How Youth Can Build Better Money Habits in 2026",
@@ -159,6 +165,7 @@ export default function AdminDashboard() {
         keyActivities: "Optional tags, comma-separated (e.g. savings, students, budgeting)",
         thumbnailLabel: "Blog cover image",
         galleryLabel: "Additional blog images (optional)",
+        resourcePdfLabel: "Attach resource PDF (optional)",
       },
     }),
     [],
@@ -217,6 +224,7 @@ export default function AdminDashboard() {
           .filter(Boolean),
         thumbnail: form.thumbnail,
         gallery: form.gallery,
+        resourcePdf: form.resourcePdf,
         featured: activeTab === "flic" || activeTab === "hubs",
         published: true,
       } as const;
@@ -406,6 +414,16 @@ export default function AdminDashboard() {
                             ...prev,
                             gallery: Array.from(e.target.files ?? []),
                           }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">{fieldCopy[activeTab].resourcePdfLabel}</label>
+                      <Input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, resourcePdf: e.target.files?.[0] ?? null }))
                         }
                       />
                     </div>

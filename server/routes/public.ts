@@ -5,6 +5,7 @@ import {
   listProgramsByCategory,
   listPublishedPosts,
   getPostBySlug,
+  getPostById,
   getProgramById,
   listTeamMembers,
   listTestimonials,
@@ -12,6 +13,30 @@ import {
 } from "../services/cms";
 
 const publicRouter = Router();
+
+function sanitizeFilename(input: string): string {
+  const base = input
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+
+  return base || "resource";
+}
+
+function sanitizeAttachmentFilename(input: string): string {
+  const cleaned = input.replace(/[\u0000-\u001f"<>:|?*]+/g, "").trim();
+  if (!cleaned) return "resource.pdf";
+  const withExtension = /\.pdf$/i.test(cleaned) ? cleaned : `${cleaned}.pdf`;
+  return withExtension.slice(0, 180);
+}
+
+function isPdfResponse(contentType: string, bytes: Buffer): boolean {
+  if (contentType.includes("pdf")) return true;
+  // PDF files start with "%PDF-"
+  return bytes.subarray(0, 5).toString("utf8") === "%PDF-";
+}
 
 publicRouter.get("/posts", async (_req, res, next) => {
   try {
@@ -87,6 +112,86 @@ publicRouter.get("/program/:id", async (req, res, next) => {
       return res.status(404).json({ message: "Program not found" });
     }
     return res.json(program);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+publicRouter.get("/resources/:id/view", async (req, res, next) => {
+  try {
+    const post = await getPostById(req.params.id);
+    if (!post || !post.resourcePdfUrl) {
+      return res.status(404).json({ message: "Resource PDF not found" });
+    }
+
+    const upstream = await fetch(post.resourcePdfUrl);
+    if (!upstream.ok) {
+      const cloudinaryError =
+        upstream.headers.get("x-cld-error") ||
+        (await upstream.text().catch(() => ""));
+      return res.status(502).json({
+        message: cloudinaryError
+          ? `Failed to retrieve PDF from Cloudinary: ${cloudinaryError}`
+          : "Failed to retrieve PDF from Cloudinary",
+      });
+    }
+
+    const bytes = Buffer.from(await upstream.arrayBuffer());
+    const contentType = (upstream.headers.get("content-type") || "").toLowerCase();
+    if (!isPdfResponse(contentType, bytes)) {
+      return res.status(502).json({
+        message:
+          "Cloudinary returned a non-PDF response. Check Cloudinary PDF delivery/security settings.",
+      });
+    }
+
+    const filename = post.resourcePdfName
+      ? sanitizeAttachmentFilename(post.resourcePdfName)
+      : `${sanitizeFilename(post.title)}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename=\"${filename}\"`);
+    return res.send(bytes);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+publicRouter.get("/resources/:id/download", async (req, res, next) => {
+  try {
+    const post = await getPostById(req.params.id);
+    if (!post || !post.resourcePdfUrl) {
+      return res.status(404).json({ message: "Resource PDF not found" });
+    }
+
+    const upstream = await fetch(post.resourcePdfUrl);
+    if (!upstream.ok) {
+      const cloudinaryError =
+        upstream.headers.get("x-cld-error") ||
+        (await upstream.text().catch(() => ""));
+      return res.status(502).json({
+        message: cloudinaryError
+          ? `Failed to retrieve PDF from Cloudinary: ${cloudinaryError}`
+          : "Failed to retrieve PDF from Cloudinary",
+      });
+    }
+
+    const bytes = Buffer.from(await upstream.arrayBuffer());
+    const contentType = (upstream.headers.get("content-type") || "").toLowerCase();
+    if (!isPdfResponse(contentType, bytes)) {
+      return res.status(502).json({
+        message:
+          "Cloudinary returned a non-PDF response. Check Cloudinary PDF delivery/security settings.",
+      });
+    }
+
+    const filename = post.resourcePdfName
+      ? sanitizeAttachmentFilename(post.resourcePdfName)
+      : `${sanitizeFilename(post.title)}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=\"${filename}\"`);
+    return res.send(bytes);
   } catch (error) {
     return next(error);
   }

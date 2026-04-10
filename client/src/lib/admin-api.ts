@@ -23,6 +23,7 @@ type AdminPostPayload = {
   keyActivities?: string[];
   thumbnail?: File | null;
   gallery?: File[];
+  resourcePdf?: File | null;
 };
 
 function buildAuthHeaders(): HeadersInit {
@@ -49,6 +50,7 @@ function appendPostFormData(formData: FormData, payload: AdminPostPayload): void
   formData.append("published", String(payload.published ?? true));
   if (payload.thumbnail) formData.append("thumbnail", payload.thumbnail);
   payload.gallery?.forEach((file) => formData.append("gallery", file));
+  if (payload.resourcePdf) formData.append("resourcePdf", payload.resourcePdf);
 }
 
 async function parseApiError(

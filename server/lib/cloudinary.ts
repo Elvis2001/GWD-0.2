@@ -17,6 +17,16 @@ cloudinary.config({
 });
 
 type UploadFolder = "gwd/flic" | "gwd/hubs" | "gwd/activities" | "gwd/blog";
+type CloudinaryResourceType = "image" | "raw";
+
+type CloudinaryUploadOptions = {
+  public_id?: string;
+  format?: string;
+  filename_override?: string;
+  overwrite?: boolean;
+  use_filename?: boolean;
+  unique_filename?: boolean;
+};
 
 export function resolveCategoryFolder(rawCategory: string): UploadFolder {
   const category = rawCategory.trim().toLowerCase();
@@ -26,13 +36,15 @@ export function resolveCategoryFolder(rawCategory: string): UploadFolder {
   return "gwd/blog";
 }
 
-export async function uploadBufferToCloudinary(
+async function uploadBufferWithResourceType(
   fileBuffer: Buffer,
   folder: UploadFolder,
+  resourceType: CloudinaryResourceType,
+  options: CloudinaryUploadOptions = {},
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
+      { folder, resource_type: resourceType, ...options },
       (error: unknown, result: { secure_url?: string } | undefined) => {
         if (error) {
           reject(error);
@@ -46,5 +58,40 @@ export async function uploadBufferToCloudinary(
       },
     );
     stream.end(fileBuffer);
+  });
+}
+
+export async function uploadBufferToCloudinary(
+  fileBuffer: Buffer,
+  folder: UploadFolder,
+): Promise<string> {
+  return uploadBufferWithResourceType(fileBuffer, folder, "image");
+}
+
+export async function uploadPdfBufferToCloudinary(
+  fileBuffer: Buffer,
+  folder: UploadFolder,
+  originalFilename?: string,
+): Promise<string> {
+  const rawName = originalFilename?.trim() || "resource-file";
+  const noExt = rawName.replace(/\.pdf$/i, "");
+  const safeBaseName =
+    noExt
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "resource-file";
+
+  // Keep stable human-readable names while still avoiding collisions.
+  const publicId = `${safeBaseName}-${Date.now()}`;
+
+  return uploadBufferWithResourceType(fileBuffer, folder, "raw", {
+    public_id: publicId,
+    format: "pdf",
+    filename_override: `${safeBaseName}.pdf`,
+    overwrite: false,
+    use_filename: false,
+    unique_filename: false,
   });
 }
