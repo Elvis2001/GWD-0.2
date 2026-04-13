@@ -56,7 +56,7 @@ type UpsertInput = {
   resourcePdfUrl?: string | null;
   resourcePdfName?: string | null;
   keyActivities?: string[];
-  contentType?: "post" | "program" | "gallery";
+  contentType?: "post" | "program" | "gallery" | "resource";
 };
 
 function mapDbPost(row: DbPost): CmsPost {
@@ -168,6 +168,20 @@ export async function listProgramsByCategory(category: string): Promise<CmsProgr
 
   const rows = await assertNoError(result, "Failed to fetch programs");
   return (rows as DbPost[]).map(mapDbProgram);
+}
+
+export async function listResources(): Promise<CmsPost[]> {
+  const result = await supabase
+    .from(POSTS_TABLE)
+    .select(
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+    )
+    .eq("published", true)
+    .eq("content_type", "resource")
+    .order("created_at", { ascending: false });
+
+  const rows = await assertNoError(result, "Failed to fetch resources");
+  return (rows as DbPost[]).map(mapDbPost);
 }
 
 export async function getProgramById(id: string): Promise<CmsProgram | null> {

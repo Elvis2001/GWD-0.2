@@ -4,6 +4,7 @@ import {
   listGalleryByCategory,
   listProgramsByCategory,
   listPublishedPosts,
+  listResources,
   getPostBySlug,
   getPostById,
   getProgramById,
@@ -114,6 +115,15 @@ publicRouter.get("/program/:id", async (req, res, next) => {
     return res.json(program);
   } catch (error) {
     return next(error);
+  }
+});
+
+publicRouter.get("/resources", async (_req, res, next) => {
+  try {
+    const resources = await listResources();
+    res.json(resources);
+  } catch (error) {
+    next(error);
   }
 });
 

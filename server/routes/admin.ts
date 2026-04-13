@@ -27,6 +27,15 @@ const basePostSchema = z.object({
   keyActivities: z.string().optional(),
 });
 
+const resourceUploadSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  icon: z.string().optional(),
+  color: z.string().optional(),
+  points: z.string().optional(),
+  published: z.enum(["true", "false"]).optional(),
+});
+
 type UploadedFile = {
   buffer: Buffer;
   originalname: string;
@@ -253,6 +262,44 @@ adminRouter.post("/admin/program", verifyAdmin, uploadPostAssets, async (req, re
     res.status(201).json(created);
   } catch (error) {
     next(error);
+  }
+});
+
+adminRouter.post("/admin/resource", verifyAdmin, uploadPostAssets, async (req, res, next) => {
+  try {
+    const parsed = resourceUploadSchema.parse(req.body);
+    const files = req.files as Record<string, UploadedFile[]>;
+    const resourcePdfFile = files?.resourcePdf?.[0];
+
+    if (!resourcePdfFile) {
+      return res.status(400).json({ message: "PDF file is required for resource upload." });
+    }
+
+    const folder = resolveCategoryFolder("activities");
+    const resourcePdfUrl = await uploadPdfBufferToCloudinary(
+      resourcePdfFile.buffer,
+      folder,
+      resourcePdfFile.originalname,
+    );
+    const resourcePdfName = normalizePdfFilename(resourcePdfFile.originalname);
+
+    const created = await createPost({
+      title: parsed.title,
+      category: "activities",
+      excerpt: parsed.description,
+      content: parsed.description,
+      role: parsed.icon,
+      impactReport: parsed.color,
+      keyActivities: parseStringArray(parsed.points),
+      published: parseBoolean(parsed.published, true),
+      resourcePdfUrl,
+      resourcePdfName,
+      contentType: "resource",
+    });
+
+    return res.status(201).json(created);
+  } catch (error) {
+    return next(error);
   }
 });
 

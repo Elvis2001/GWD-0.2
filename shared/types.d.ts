@@ -18,7 +18,7 @@ export interface Post {
   resourcePdfUrl?: string;
   resourcePdfName?: string;
   keyActivities?: string[];
-  contentType?: "post" | "program" | "gallery";
+  contentType?: "post" | "program" | "gallery" | "resource";
   createdAt: Date | string | null;
   updatedAt?: Date | string | null;
 }

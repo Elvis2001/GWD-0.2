@@ -6,7 +6,7 @@ export type AdminPostSummary = {
   title: string;
   category: string;
   createdAt: string | null;
-  contentType?: "post" | "program" | "gallery";
+  contentType?: "post" | "program" | "gallery" | "resource";
 };
 
 type AdminPostPayload = {
@@ -24,6 +24,16 @@ type AdminPostPayload = {
   thumbnail?: File | null;
   gallery?: File[];
   resourcePdf?: File | null;
+};
+
+type AdminResourcePayload = {
+  title: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  points?: string[];
+  published?: boolean;
+  resourcePdf: File;
 };
 
 function buildAuthHeaders(): HeadersInit {
@@ -108,6 +118,32 @@ export async function createAdminProgram(payload: AdminPostPayload): Promise<unk
   return res.json();
 }
 
+export async function createAdminResource(payload: AdminResourcePayload): Promise<unknown> {
+  const formData = new FormData();
+  formData.append("title", payload.title);
+  if (payload.description) formData.append("description", payload.description);
+  if (payload.icon) formData.append("icon", payload.icon);
+  if (payload.color) formData.append("color", payload.color);
+  if (payload.points?.length) formData.append("points", JSON.stringify(payload.points));
+  formData.append("published", String(payload.published ?? true));
+  formData.append("resourcePdf", payload.resourcePdf);
+
+  const res = await fetch(buildApiUrl("/api/admin/resource"), {
+    method: "POST",
+    headers: buildAuthHeaders(),
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw await parseApiError(
+      res,
+      "Failed to create resource",
+      "Session expired or invalid. Please log in again.",
+    );
+  }
+  return res.json();
+}
+
 export async function listAdminPosts(): Promise<AdminPostSummary[]> {
   const res = await fetch(buildApiUrl("/api/posts"));
   if (!res.ok) {
@@ -120,7 +156,23 @@ export async function listAdminPosts(): Promise<AdminPostSummary[]> {
     title: (entry.title as string) ?? "",
     category: (entry.category as string) ?? "",
     createdAt: (entry.createdAt as string) ?? null,
-    contentType: entry.contentType as "post" | "program" | "gallery" | undefined,
+    contentType: entry.contentType as "post" | "program" | "gallery" | "resource" | undefined,
+  }));
+}
+
+export async function listAdminResources(): Promise<AdminPostSummary[]> {
+  const res = await fetch(buildApiUrl("/api/resources"));
+  if (!res.ok) {
+    throw new Error("Failed to load resources");
+  }
+
+  const data = (await res.json()) as Array<Record<string, unknown>>;
+  return data.map((entry) => ({
+    id: entry.id as string | number,
+    title: (entry.title as string) ?? "",
+    category: (entry.category as string) ?? "activities",
+    createdAt: (entry.createdAt as string) ?? null,
+    contentType: "resource" as const,
   }));
 }
 
