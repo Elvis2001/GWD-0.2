@@ -11,6 +11,7 @@ import type {
 
 const api = {
   posts: "/api/posts",
+  resources: "/api/resources",
   postBySlug: "/api/posts/:slug",
   team: "/api/team",
   gallery: "/api/gallery",
@@ -44,6 +45,17 @@ export function usePosts() {
     queryFn: async () => {
       const res = await fetch(buildApiUrl(api.posts), { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch posts");
+      return (await res.json()) as Post[];
+    },
+  });
+}
+
+export function useResources() {
+  return useQuery({
+    queryKey: [api.resources],
+    queryFn: async () => {
+      const res = await fetch(buildApiUrl(api.resources), { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch resources");
       return (await res.json()) as Post[];
     },
   });

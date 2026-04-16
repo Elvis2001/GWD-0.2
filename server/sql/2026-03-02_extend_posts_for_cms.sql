@@ -22,6 +22,8 @@ alter table public.posts
   add column if not exists role text,
   add column if not exists image_url text,
   add column if not exists impact_report text,
+  add column if not exists resource_pdf_url text,
+  add column if not exists resource_pdf_name text,
   add column if not exists key_activities text[] default '{}',
   add column if not exists updated_at timestamptz not null default now();
 

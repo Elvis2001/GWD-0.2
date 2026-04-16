@@ -1,70 +1,89 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
-import { 
-  Cpu, 
-  Terminal, 
-  Zap, 
-  TrendingUp, 
-  Lightbulb, 
-  Code2, 
-  ChevronLeft, 
+import {
+  Terminal,
+  Zap,
+  TrendingUp,
+  Lightbulb,
+  Code2,
+  ChevronLeft,
   ChevronRight,
   BrainCircuit,
-  Rocket
+  Rocket,
+  Download,
+  ExternalLink,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useResources } from "@/hooks/use-content";
+import { Spinner } from "@/components/ui/spinner";
+import { buildApiUrl } from "@/lib/api";
 
 export default function ProgramAI() {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: resources, isLoading } = useResources();
+  const pdfResources = (resources ?? []).filter((resource) => Boolean(resource.resourcePdfUrl));
 
   const programs = [
     {
       title: "Savings and Digital Financial Oppunities",
-      description: "Intrroduction to effective saving strategies and how to leverage digital financial tools. We cover the basics of budgeting, saving, and using digital platforms for financial management.",
+      description:
+        "Intrroduction to effective saving strategies and how to leverage digital financial tools. We cover the basics of budgeting, saving, and using digital platforms for financial management.",
       icon: <BrainCircuit className="w-12 h-12" />,
       color: "bg-blue-50 text-blue-600",
-      points: [
-        "Smart Saving Techniques",
-        "Digital Wallets & Mobile Banking",
-        "Online Investment Platforms"
-      ]
+      points: ["Smart Saving Techniques", "Digital Wallets & Mobile Banking", "Online Investment Platforms"],
     },
     {
       title: "Prompt Engineering Mastery",
-      description: "Learning the art of communicating with AI models. We teach students how to craft effective prompts to solve complex problems and boost productivity.",
+      description:
+        "Learning the art of communicating with AI models. We teach students how to craft effective prompts to solve complex problems and boost productivity.",
       icon: <Terminal className="w-12 h-12" />,
       color: "bg-purple-50 text-purple-600",
       points: [
         "Structured Prompting Frameworks",
         "Iterative Refinement Techniques",
-        "Multi-modal AI Interactions"
-      ]
+        "Multi-modal AI Interactions",
+      ],
     },
     {
       title: "AI & Financial Literacy",
-      description: "Using AI tools to enhance financial decision-making. Students learn to use AI for budgeting, investment analysis, and market research.",
+      description:
+        "Using AI tools to enhance financial decision-making. Students learn to use AI for budgeting, investment analysis, and market research.",
       icon: <TrendingUp className="w-12 h-12" />,
       color: "bg-green-50 text-green-600",
       points: [
         "AI-Powered Personal Finance",
         "Data-Driven Investment Insights",
-        "Automated Budgeting Assistants"
-      ]
+        "Automated Budgeting Assistants",
+      ],
     },
     {
       title: "AI for Entrepreneurship",
-      description: "Leveraging AI to start and scale businesses. From market analysis to content creation, we show how AI acts as a co-founder for young entrepreneurs.",
+      description:
+        "Leveraging AI to start and scale businesses. From market analysis to content creation, we show how AI acts as a co-founder for young entrepreneurs.",
       icon: <Rocket className="w-12 h-12" />,
       color: "bg-amber-50 text-amber-600",
       points: [
         "AI-Driven Market Research",
         "Content & Marketing Automation",
-        "Operational Efficiency with AI"
-      ]
-    }
+        "Operational Efficiency with AI",
+      ],
+    },
   ];
+
+  const resolveResourceIcon = (iconKey?: string) => {
+    const key = (iconKey || "").trim().toLowerCase();
+    if (key === "terminal") return <Terminal className="w-12 h-12" />;
+    if (key === "brain-circuit") return <BrainCircuit className="w-12 h-12" />;
+    if (key === "trending-up") return <TrendingUp className="w-12 h-12" />;
+    if (key === "rocket") return <Rocket className="w-12 h-12" />;
+    return <Terminal className="w-12 h-12" />;
+  };
+
+  const resolveResourceColor = (color?: string) => {
+    const value = (color || "").trim();
+    return value || "bg-purple-50 text-purple-600";
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -77,18 +96,87 @@ export default function ProgramAI() {
   return (
     <div className="pt-24 pb-16">
       <div className="container-custom">
-        <SectionHeader 
-          title="Digital Financial Literacy Resources" 
-          subtitle="Future Skills" 
+        <SectionHeader
+          title="Digital Financial Literacy Resources"
+          subtitle="Future Skills"
           description="Preparing Nigerian youth for the AI revolution with practical skills in prompt engineering and artificial intelligence thereby aiding financial literacy."
         />
 
-        {/* Sliding Cards Container */}
+        <section className="mb-24">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-black text-gray-900">Downloadable Resources</h2>
+              <p className="text-gray-600 mt-2">
+                Admin-uploaded PDF guides in the same resource-card format.
+              </p>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-10">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pdfResources.map((resource) => (
+                <motion.div
+                  key={String(resource.id)}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-50 flex flex-col h-full"
+                >
+                  <div
+                    className={`w-20 h-20 rounded-3xl ${resolveResourceColor(resource.impactReport)} flex items-center justify-center mb-8 shrink-0`}
+                  >
+                    {resolveResourceIcon(resource.role)}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">{resource.title}</h3>
+                  <p className="text-gray-600 mb-8 leading-relaxed flex-grow">
+                    {resource.content || resource.excerpt}
+                  </p>
+                  <div className="space-y-3 pt-6 border-t border-gray-50 mb-6">
+                    {(resource.keyActivities ?? []).map((point, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <Zap className="w-4 h-4 text-secondary" />
+                        <span className="text-sm font-medium text-gray-700">{point}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-auto">
+                    <Button asChild className="w-full">
+                      <a href={buildApiUrl(`/api/resources/${encodeURIComponent(String(resource.id))}/download`)}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <a
+                        href={buildApiUrl(`/api/resources/${encodeURIComponent(String(resource.id))}/view`)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View
+                      </a>
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+              {pdfResources.length === 0 && (
+                <p className="col-span-3 text-center text-muted-foreground py-10">
+                  No PDF resources have been published yet.
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+
         <div className="relative group mb-20">
-          <div 
+          <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-8 px-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {programs.map((item, i) => (
               <motion.div
@@ -103,9 +191,7 @@ export default function ProgramAI() {
                   {item.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
-                <p className="text-gray-600 mb-8 leading-relaxed flex-grow">
-                  {item.description}
-                </p>
+                <p className="text-gray-600 mb-8 leading-relaxed flex-grow">{item.description}</p>
                 <div className="space-y-3 pt-6 border-t border-gray-50">
                   {item.points.map((point, idx) => (
                     <div key={idx} className="flex items-center gap-3">
@@ -118,11 +204,10 @@ export default function ProgramAI() {
             ))}
           </div>
 
-          {/* Navigation Buttons */}
           <div className="absolute top-1/2 -left-4 -translate-y-1/2 z-10 hidden md:block opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="rounded-full shadow-lg bg-white h-12 w-12 border-gray-100"
               onClick={() => scroll("left")}
             >
@@ -130,9 +215,9 @@ export default function ProgramAI() {
             </Button>
           </div>
           <div className="absolute top-1/2 -right-4 -translate-y-1/2 z-10 hidden md:block opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="rounded-full shadow-lg bg-white h-12 w-12 border-gray-100"
               onClick={() => scroll("right")}
             >
@@ -141,17 +226,17 @@ export default function ProgramAI() {
           </div>
         </div>
 
-        {/* Integration with Finance Section */}
         <div className="bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary rounded-full blur-[160px]" />
           </div>
-          
+
           <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl font-bold mb-8">Bridging AI and Financial Literacy</h2>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-                We believe that modern financial literacy is incomplete without AI skills. Our program integrates AI literacy with our core financial curriculum to give youth a competitive edge.
+                We believe that modern financial literacy is incomplete without AI skills. Our program
+                integrates AI literacy with our core financial curriculum to give youth a competitive edge.
               </p>
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
@@ -171,7 +256,10 @@ export default function ProgramAI() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-2">Creative Problem Solving</h3>
-                  <p className="text-gray-400">AI doesn't just calculate; it helps youth think outside the box when facing financial challenges.</p>
+                  <p className="text-gray-400">
+                    AI doesn't just calculate; it helps youth think outside the box when facing financial
+                    challenges.
+                  </p>
                 </div>
               </div>
               <div className="flex gap-6 items-start">
@@ -180,7 +268,10 @@ export default function ProgramAI() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-2">Technical Empowerment</h3>
-                  <p className="text-gray-400">Nigerian youth aren't just consumers of AI; they're becoming creators and engineers of the future.</p>
+                  <p className="text-gray-400">
+                    Nigerian youth aren't just consumers of AI; they're becoming creators and engineers of the
+                    future.
+                  </p>
                 </div>
               </div>
             </div>

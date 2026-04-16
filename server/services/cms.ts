@@ -30,6 +30,8 @@ type DbPost = {
   role: string | null;
   image_url: string | null;
   impact_report: string | null;
+  resource_pdf_url: string | null;
+  resource_pdf_name: string | null;
   key_activities: string[] | null;
   content_type: string | null;
   created_at: string | null;
@@ -51,8 +53,10 @@ type UpsertInput = {
   role?: string;
   imageUrl?: string;
   impactReport?: string;
+  resourcePdfUrl?: string | null;
+  resourcePdfName?: string | null;
   keyActivities?: string[];
-  contentType?: "post" | "program" | "gallery";
+  contentType?: "post" | "program" | "gallery" | "resource";
 };
 
 function mapDbPost(row: DbPost): CmsPost {
@@ -73,6 +77,8 @@ function mapDbPost(row: DbPost): CmsPost {
     role: row.role ?? undefined,
     imageUrl: row.image_url ?? undefined,
     impactReport: row.impact_report ?? undefined,
+    resourcePdfUrl: row.resource_pdf_url ?? undefined,
+    resourcePdfName: row.resource_pdf_name ?? undefined,
     keyActivities: row.key_activities ?? [],
     contentType: (row.content_type as CmsPost["contentType"]) ?? "post",
     createdAt: row.created_at,
@@ -104,7 +110,7 @@ export async function listPublishedPosts(): Promise<CmsPost[]> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .eq("published", true)
     .in("content_type", ["post", "program"])
@@ -118,7 +124,7 @@ export async function getPostBySlug(slug: string): Promise<CmsPost | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .eq("slug", slug)
     .eq("published", true)
@@ -137,7 +143,7 @@ export async function listGalleryByCategory(category: string): Promise<CmsPost[]
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .eq("published", true)
     .eq("category", category.toLowerCase())
@@ -153,7 +159,7 @@ export async function listProgramsByCategory(category: string): Promise<CmsProgr
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .eq("published", true)
     .eq("category", category.toLowerCase())
@@ -164,11 +170,25 @@ export async function listProgramsByCategory(category: string): Promise<CmsProgr
   return (rows as DbPost[]).map(mapDbProgram);
 }
 
+export async function listResources(): Promise<CmsPost[]> {
+  const result = await supabase
+    .from(POSTS_TABLE)
+    .select(
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+    )
+    .eq("published", true)
+    .eq("content_type", "resource")
+    .order("created_at", { ascending: false });
+
+  const rows = await assertNoError(result, "Failed to fetch resources");
+  return (rows as DbPost[]).map(mapDbPost);
+}
+
 export async function getProgramById(id: string): Promise<CmsProgram | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .eq("id", id)
     .eq("content_type", "program")
@@ -181,6 +201,25 @@ export async function getProgramById(id: string): Promise<CmsProgram | null> {
     return null;
   }
   return mapDbProgram(result.data as DbPost);
+}
+
+export async function getPostById(id: string): Promise<CmsPost | null> {
+  const result = await supabase
+    .from(POSTS_TABLE)
+    .select(
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+    )
+    .eq("id", id)
+    .eq("published", true)
+    .maybeSingle();
+
+  if (result.error) {
+    throw new Error(`Failed to fetch post: ${result.error.message}`);
+  }
+  if (!result.data) {
+    return null;
+  }
+  return mapDbPost(result.data as DbPost);
 }
 
 export async function createPost(input: UpsertInput): Promise<CmsPost> {
@@ -200,6 +239,8 @@ export async function createPost(input: UpsertInput): Promise<CmsPost> {
     role: input.role ?? null,
     image_url: input.imageUrl ?? null,
     impact_report: input.impactReport ?? null,
+    resource_pdf_url: input.resourcePdfUrl ?? null,
+    resource_pdf_name: input.resourcePdfName ?? null,
     key_activities: input.keyActivities ?? [],
     content_type: input.contentType ?? "post",
   };
@@ -208,7 +249,7 @@ export async function createPost(input: UpsertInput): Promise<CmsPost> {
     .from(POSTS_TABLE)
     .insert(payload)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .single();
 
@@ -235,6 +276,8 @@ export async function updatePost(
   if (input.role !== undefined) payload.role = input.role;
   if (input.imageUrl !== undefined) payload.image_url = input.imageUrl;
   if (input.impactReport !== undefined) payload.impact_report = input.impactReport;
+  if (input.resourcePdfUrl !== undefined) payload.resource_pdf_url = input.resourcePdfUrl;
+  if (input.resourcePdfName !== undefined) payload.resource_pdf_name = input.resourcePdfName;
   if (input.keyActivities !== undefined) payload.key_activities = input.keyActivities;
   if (input.contentType !== undefined) payload.content_type = input.contentType;
 
@@ -243,7 +286,7 @@ export async function updatePost(
     .update(payload)
     .eq("id", id)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
     )
     .maybeSingle();
 
