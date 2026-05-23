@@ -40,6 +40,7 @@ export default function DetailedView() {
   const hasKeyActivities = keyActivities.length > 0;
   const hasImpactReport = Boolean(item.impactReport && item.impactReport.trim().length > 0);
   const hasResourcePdf = Boolean(item.resourcePdfUrl);
+  const facilitatorName = item.category === "flic" ? item.author?.trim() : "";
   const resourceViewUrl = buildApiUrl(`/api/resources/${encodeURIComponent(String(item.id))}/view`);
   const resourceDownloadUrl = buildApiUrl(
     `/api/resources/${encodeURIComponent(String(item.id))}/download`,
@@ -83,9 +84,16 @@ export default function DetailedView() {
       <div className="container-custom mt-8 relative z-30">
         <div className="grid lg:grid-cols-3 gap-12 mt-8">
           <div className="lg:col-span-2 space-y-12">
-            <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white">
+            <Card className="detail-view-card border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white">
               <CardContent className="p-10">
                 <h2 className="text-3xl font-black mb-6">Overview & Impact</h2>
+                {facilitatorName && (
+                  <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4">
+                    <p className="text-sm font-semibold text-gray-700">
+                      Facilitated by: <span className="text-primary">{facilitatorName}</span>
+                    </p>
+                  </div>
+                )}
                 <p className="text-gray-600 leading-relaxed text-lg mb-8">{item.content}</p>
                 {(!isBlogPost || hasKeyActivities || hasImpactReport) && (
                   <div className="grid md:grid-cols-2 gap-8">

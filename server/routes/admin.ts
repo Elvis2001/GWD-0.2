@@ -7,7 +7,7 @@ import {
   uploadBufferToCloudinary,
   uploadPdfBufferToCloudinary,
 } from "../lib/cloudinary";
-import { createPost, deletePost, updatePost } from "../services/cms";
+import { createPost, deletePost, getAdminPostById, updatePost } from "../services/cms";
 
 const adminRouter = Router();
 
@@ -121,6 +121,18 @@ adminRouter.post("/admin/post", verifyAdmin, uploadPostAssets, async (req, res, 
   }
 });
 
+adminRouter.get("/admin/post/:id", verifyAdmin, async (req, res, next) => {
+  try {
+    const post = await getAdminPostById(String(req.params.id));
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    return res.json(post);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 adminRouter.put("/admin/post/:id", verifyAdmin, uploadPostAssets, async (req, res, next) => {
   try {
     const parsed = basePostSchema.partial().parse(req.body);
@@ -158,12 +170,12 @@ adminRouter.put("/admin/post/:id", verifyAdmin, uploadPostAssets, async (req, re
       role: parsed.role,
       imageUrl: parsed.imageUrl,
       impactReport: parsed.impactReport,
-      keyActivities: parseStringArray(parsed.keyActivities),
+      keyActivities:
+        parsed.keyActivities === undefined ? undefined : parseStringArray(parsed.keyActivities),
       thumbnailUrl,
       galleryImages: galleryUrls.length > 0 ? galleryUrls : undefined,
       resourcePdfUrl,
       resourcePdfName,
-      contentType: "post",
     });
 
     if (!updated) {

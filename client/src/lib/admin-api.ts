@@ -9,7 +9,25 @@ export type AdminPostSummary = {
   contentType?: "post" | "program" | "gallery" | "resource";
 };
 
-type AdminPostPayload = {
+export type AdminPostDetails = AdminPostSummary & {
+  slug: string;
+  excerpt: string;
+  content: string;
+  featured?: boolean;
+  published?: boolean;
+  author: string;
+  name?: string;
+  impactReport?: string;
+  keyActivities?: string[];
+  thumbnailImage?: string;
+  coverImage?: string;
+  galleryImages?: string[];
+  resourcePdfUrl?: string;
+  resourcePdfName?: string;
+  updatedAt?: string | null;
+};
+
+export type AdminPostPayload = {
   title: string;
   name?: string;
   slug?: string;
@@ -97,6 +115,45 @@ export async function createAdminPost(payload: AdminPostPayload): Promise<unknow
     );
   }
   return res.json();
+}
+
+export async function getAdminPost(id: string): Promise<AdminPostDetails> {
+  const res = await fetch(buildApiUrl(`/api/admin/post/${id}`), {
+    headers: buildAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    throw await parseApiError(
+      res,
+      "Failed to load post",
+      "Session expired or invalid. Please log in again.",
+    );
+  }
+
+  return (await res.json()) as AdminPostDetails;
+}
+
+export async function updateAdminPost(
+  id: string,
+  payload: AdminPostPayload,
+): Promise<AdminPostDetails> {
+  const formData = new FormData();
+  appendPostFormData(formData, payload);
+
+  const res = await fetch(buildApiUrl(`/api/admin/post/${id}`), {
+    method: "PUT",
+    headers: buildAuthHeaders(),
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw await parseApiError(
+      res,
+      "Failed to update post",
+      "Session expired or invalid. Please log in again.",
+    );
+  }
+  return (await res.json()) as AdminPostDetails;
 }
 
 export async function createAdminProgram(payload: AdminPostPayload): Promise<unknown> {

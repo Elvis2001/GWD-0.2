@@ -11,6 +11,8 @@ import {
   LayoutDashboard,
   Trash2,
   FileText,
+  Edit3,
+  XCircle,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +27,14 @@ import {
   createAdminPost,
   createAdminProgram,
   deleteAdminPost,
+  getAdminPost,
   listAdminPosts,
   listAdminResources,
+  updateAdminPost,
   type AdminPostSummary,
 } from "@/lib/admin-api";
 import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/queryClient";
 
 type ProgramCategory = "flic" | "hubs" | "activities" | "blog";
 type AdminTab = ProgramCategory | "resources";
@@ -111,6 +116,8 @@ export default function AdminDashboard() {
   const [posts, setPosts] = useState<AdminPostSummary[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loadingEditId, setLoadingEditId] = useState<string | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -220,6 +227,12 @@ export default function AdminDashboard() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as AdminTab);
     setForm(emptyForm);
+    setEditingId(null);
+  };
+
+  const resetEditor = () => {
+    setEditingId(null);
+    setForm(emptyForm);
   };
 
   const loadPosts = async () => {
@@ -241,6 +254,46 @@ export default function AdminDashboard() {
   useEffect(() => {
     void loadPosts();
   }, []);
+
+  const handleStartEdit = async (id: string | number) => {
+    const postId = String(id);
+    setLoadingEditId(postId);
+    try {
+      const post = await getAdminPost(postId);
+      const category = post.category.toLowerCase() as ProgramCategory;
+
+      if (!["flic", "hubs", "activities", "blog"].includes(category)) {
+        toast({
+          title: "Cannot edit this item",
+          description: "Only standard posts and programs can be edited here.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setActiveTab(category);
+      setEditingId(postId);
+      setForm({
+        ...emptyForm,
+        title: post.title ?? "",
+        name: post.name ?? "",
+        excerpt: post.excerpt ?? "",
+        content: post.content ?? "",
+        author: post.author ?? "",
+        impactReport: post.impactReport ?? "",
+        keyActivities: post.keyActivities?.join(", ") ?? "",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      toast({
+        title: "Could not load post",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingEditId(null);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
@@ -279,6 +332,7 @@ export default function AdminDashboard() {
         });
         setForm(emptyForm);
         await loadPosts();
+        await queryClient.invalidateQueries();
         return;
       }
 
@@ -301,6 +355,18 @@ export default function AdminDashboard() {
         published: true,
       } as const;
 
+      if (editingId) {
+        await updateAdminPost(editingId, payload);
+        toast({
+          title: "Updated",
+          description: `${config[activeTab as ProgramCategory].title} content updated successfully.`,
+        });
+        resetEditor();
+        await loadPosts();
+        await queryClient.invalidateQueries();
+        return;
+      }
+
       if (activeTab === "blog") {
         await createAdminPost(payload);
       } else {
@@ -313,6 +379,7 @@ export default function AdminDashboard() {
       });
       setForm(emptyForm);
       await loadPosts();
+      await queryClient.invalidateQueries();
     } catch (error) {
       toast({
         title: "Publish failed",
@@ -333,6 +400,7 @@ export default function AdminDashboard() {
     try {
       await deleteAdminPost(postId);
       setPosts((prev) => prev.filter((post) => String(post.id) !== postId));
+      await queryClient.invalidateQueries();
       toast({ title: "Deleted", description: "Post removed successfully." });
     } catch (error) {
       toast({
@@ -407,8 +475,15 @@ export default function AdminDashboard() {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="border-none shadow-xl bg-white rounded-[2rem]">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-black">{config[category].title}</CardTitle>
-                    <CardDescription>{config[category].description}</CardDescription>
+                    <CardTitle className="text-2xl font-black">
+                      {editingId && activeTab === category ? "Edit" : "Create"}{" "}
+                      {config[category].title}
+                    </CardTitle>
+                    <CardDescription>
+                      {editingId && activeTab === category
+                        ? "Update the existing content. Upload new files only when you want to replace media."
+                        : config[category].description}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <div className="space-y-2">
@@ -506,10 +581,30 @@ export default function AdminDashboard() {
                         }
                       />
                     </div>
-                    <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-                      <Save className="w-4 h-4 mr-2" />
-                      {submitting ? "Publishing..." : "Publish"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {editingId && activeTab === category && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={resetEditor}
+                          disabled={submitting}
+                          className="sm:w-auto"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Cancel
+                        </Button>
+                      )}
+                      <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
+                        <Save className="w-4 h-4 mr-2" />
+                        {submitting
+                          ? editingId
+                            ? "Saving..."
+                            : "Publishing..."
+                          : editingId
+                            ? "Save Changes"
+                            : "Publish"}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -518,7 +613,7 @@ export default function AdminDashboard() {
                     <CardTitle className="text-2xl font-black">
                       Manage {config[category].title} Posts
                     </CardTitle>
-                    <CardDescription>Delete previously published items for this section.</CardDescription>
+                    <CardDescription>Edit or delete previously published items for this section.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {loadingPosts && (
@@ -538,17 +633,27 @@ export default function AdminDashboard() {
                           <div>
                             <p className="font-semibold text-gray-900">{post.title}</p>
                             <p className="text-xs text-gray-500">
-                              {post.category.toUpperCase()} • {formatDate(post.createdAt)}
+                              {post.category.toUpperCase()} - {formatDate(post.createdAt)}
                             </p>
                           </div>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleDeletePost(post.id, post.title)}
-                            disabled={deletingId === String(post.id)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            {deletingId === String(post.id) ? "Deleting..." : "Delete"}
-                          </Button>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleStartEdit(post.id)}
+                              disabled={loadingEditId === String(post.id) || Boolean(deletingId)}
+                            >
+                              <Edit3 className="w-4 h-4 mr-2" />
+                              {loadingEditId === String(post.id) ? "Loading..." : "Edit"}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleDeletePost(post.id, post.title)}
+                              disabled={deletingId === String(post.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              {deletingId === String(post.id) ? "Deleting..." : "Delete"}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                   </CardContent>

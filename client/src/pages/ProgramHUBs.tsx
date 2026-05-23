@@ -131,7 +131,7 @@ export default function ProgramHUBs() {
           ))}
           {institutions.length === 0 && (
             <p className="col-span-2 text-center text-muted-foreground py-12">
-              No HUB entries have been published yet.
+              COMING SOON..
             </p>
           )}
         </div>

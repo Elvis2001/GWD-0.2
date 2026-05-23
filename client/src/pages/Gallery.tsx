@@ -52,7 +52,7 @@ export default function Gallery() {
                 </span>
                 <h3 className="text-2xl font-black text-white mb-6 leading-tight">{cat.title}</h3>
                 <Link href={`/gallery/${cat.slug}`}>
-                  <Button className="w-full bg-white text-gray-900 hover:bg-primary hover:text-white font-bold h-12 rounded-xl transition-all border-none">
+                  <Button className="w-full bg-white text-gray-900 dark:bg-card dark:text-foreground hover:!bg-primary hover:!text-white font-bold h-12 rounded-xl transition-all border-none">
                     View Gallery
                   </Button>
                 </Link>

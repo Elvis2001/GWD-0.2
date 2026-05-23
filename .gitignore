@@ -9,3 +9,4 @@ server/dist
 *.env
 !.env.example
 *.tar.gz
+gwd

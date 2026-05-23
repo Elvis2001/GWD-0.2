@@ -92,7 +92,7 @@ export default function About() {
   return (
     <div className="pb-16">
       {/* Hero Section with Ken Burns Effect */}
-      <section className="relative h-[80vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[80vh] min-h-[700px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/60 z-10" />
           <motion.img 

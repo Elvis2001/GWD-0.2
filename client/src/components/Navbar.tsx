@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/use-theme";
 
 // Programs submenu items
 const programs = [
@@ -16,6 +17,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const [programsOpen, setProgramsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,11 +99,11 @@ export function Navbar() {
               )}
             </button>
             <div className="absolute top-full left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-              <div className="bg-white rounded-xl shadow-xl p-2 border border-gray-100 overflow-hidden">
+              <div className="bg-white dark:bg-card rounded-xl shadow-xl dark:shadow-[0_24px_70px_rgba(0,0,0,0.55)] p-2 border border-gray-100 dark:border-border overflow-hidden">
                 {programs.map((prog) => (
                   <Link key={prog.href} href={prog.href} className={cn(
-                    "block px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                    location === prog.href ? "bg-green-50 text-primary" : "text-gray-700 hover:bg-green-50 hover:text-primary"
+                    "nav-program-link block px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                    location === prog.href ? "is-active" : ""
                   )}>
                     {prog.title}
                   </Link>
@@ -154,7 +156,21 @@ export function Navbar() {
         </div>
 
         {/* CTA Button */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={cn(
+              "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
+              scrolled
+                ? "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
+                : "border-white/30 bg-white/10 text-white hover:bg-white/20",
+            )}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <Link href="/get-involved" className={cn(
             "px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-lg",
             scrolled 
@@ -219,6 +235,15 @@ export function Navbar() {
               <Link href="/gallery" className="py-2 border-b border-gray-100">Gallery</Link>
               <Link href="/blog" className="py-2 border-b border-gray-100">News & Blog</Link>
               <Link href="/contact" className="py-2 border-b border-gray-100">Contact</Link>
+
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex items-center justify-between py-2 border-b border-gray-100"
+              >
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </button>
               
               <Link href="/get-involved" className="mt-4 w-full bg-primary text-white text-center py-4 rounded-xl shadow-lg shadow-primary/30">
                 Get Involved

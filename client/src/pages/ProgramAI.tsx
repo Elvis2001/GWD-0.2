@@ -107,7 +107,7 @@ export default function ProgramAI() {
             <div>
               <h2 className="text-3xl font-black text-gray-900">Downloadable Resources</h2>
               <p className="text-gray-600 mt-2">
-                Admin-uploaded PDF guides in the same resource-card format.
+                Find Our curated collection of PDF resources covering financial literacy, AI integration, and prompt engineering. These materials are designed to empower Nigerian youth with the knowledge and skills needed to thrive in the digital age.
               </p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ProgramAI() {
               ))}
               {pdfResources.length === 0 && (
                 <p className="col-span-3 text-center text-muted-foreground py-10">
-                  No PDF resources have been published yet.
+                  COMING SOON...
                 </p>
               )}
             </div>

@@ -80,7 +80,7 @@ export function Footer() {
               <li><Link href="/programs/flic" className="text-gray-400 hover:text-white transition-colors">Financial Literacy Clubs</Link></li>
               <li><Link href="/programs/hubs" className="text-gray-400 hover:text-white transition-colors">HUBs (Higher Ed)</Link></li>
               <li><Link href="/programs/ai" className="text-gray-400 hover:text-white transition-colors">AI & Digital Skills</Link></li>
-              <li><Link href="/programs/leadership" className="text-gray-400 hover:text-white transition-colors">Leadership Academy</Link></li>
+              
             </ul>
           </div>
 
@@ -110,8 +110,8 @@ export function Footer() {
             © {new Date().getFullYear()} GWD Youth Foundation. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white">Terms of Service</Link>
+            <Link href="#" className="hover:text-white">Privacy Policy</Link>
+            <Link href="#" className="hover:text-white">Terms of Service</Link>
           </div>
         </div>
       </div>

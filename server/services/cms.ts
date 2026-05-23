@@ -222,6 +222,24 @@ export async function getPostById(id: string): Promise<CmsPost | null> {
   return mapDbPost(result.data as DbPost);
 }
 
+export async function getAdminPostById(id: string): Promise<CmsPost | null> {
+  const result = await supabase
+    .from(POSTS_TABLE)
+    .select(
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (result.error) {
+    throw new Error(`Failed to fetch post: ${result.error.message}`);
+  }
+  if (!result.data) {
+    return null;
+  }
+  return mapDbPost(result.data as DbPost);
+}
+
 export async function createPost(input: UpsertInput): Promise<CmsPost> {
   const slug = input.slug?.trim() || buildSlug(input.title);
   const payload = {

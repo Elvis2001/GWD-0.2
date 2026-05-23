@@ -109,8 +109,8 @@ export default function ProgramFLiC() {
   ];
 
   return (
-    <div className="pt-24 pb-16">
-      <div className="bg-gradient-to-b from-green-50 to-white py-20 relative overflow-hidden">
+    <div className="pt-24 pb-16 bg-background text-foreground">
+      <div className="bg-gradient-to-b from-green-50 to-white dark:from-slate-950 dark:via-background dark:to-background py-20 relative overflow-hidden">
         <div className="container-custom relative z-10 text-center max-w-4xl mx-auto">
           <motion.span 
             initial={{ opacity: 0 }}
