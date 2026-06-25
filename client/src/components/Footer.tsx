@@ -18,9 +18,16 @@ export function Footer() {
                 <GoogleIcon className="w-8 h-8" />
                 <span className="font-semibold text-xl">Google</span>
               </div>
-              <div className="flex items-center gap-2">
-                <FacebookIcon className="w-8 h-8" />
-                <span className="font-semibold text-xl">Facebook</span>
+             <div className="flex items-center gap-2">
+                <img
+                  src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1773411141/ChatGPT_Image_Mar_11_2026_01_46_41_PM_1_ovyc6t.png"
+                  alt="Usaku Logo"
+                  className="w-20 h-21 rounded-full object-cover"
+                />
+
+                <span className="text-white font-medium">
+                 Usaku
+                </span>
               </div>
             </div>
           </div>
@@ -43,6 +50,7 @@ export function Footer() {
                 <Facebook className="w-5 h-5" />
               </a>
               <a href="#"
+                onClick={(e) => e.preventDefault()} //to disable clicking until i'm able to get the X link from kewe
                 target="_blank" 
                 rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
