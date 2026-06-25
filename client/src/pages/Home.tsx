@@ -31,8 +31,8 @@ export default function Home() {
   const combinedTestimonials = [...(testimonials || []), ...demoTestimonials];
 
   useEffect(() => {
-    const studentsTarget = 1000;
-    const partnersTarget = 10;
+    const studentsTarget = 7000;
+    const partnersTarget = 20;
     const durationMs = 1400;
     const start = performance.now();
 
