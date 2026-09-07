@@ -68,20 +68,6 @@ export function Navbar() {
               />
             )}
           </Link>
-          
-          <Link href="/about" className={cn(
-            "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
-            location === "/about" && "text-secondary"
-          )}>
-            Who We Are
-            {location === "/about" && (
-              <motion.div 
-                layoutId="nav-underline"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary"
-              />
-            )}
-          </Link>
 
           {/* Programs Dropdown */}
           <div className="relative group">
@@ -204,7 +190,6 @@ export function Navbar() {
           >
             <div className="flex flex-col gap-6 text-lg font-semibold text-gray-800">
               <Link href="/" className="py-2 border-b border-gray-100">Home</Link>
-              <Link href="/about" className="py-2 border-b border-gray-100">Who We Are</Link>
               
               <div className="py-2 border-b border-gray-100">
                 <button 

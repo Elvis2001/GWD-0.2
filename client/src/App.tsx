@@ -19,7 +19,6 @@ function ScrollToTop() {
 
 // Pages
 import Home from "@/pages/Home";
-import About from "@/pages/About";
 import ProgramFLiC from "@/pages/ProgramFLiC";
 import ProgramHUBs from "@/pages/ProgramHUBs";
 import ProgramAI from "@/pages/ProgramAI";
@@ -42,7 +41,7 @@ function Router() {
       <main className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/about" component={About} />
+          <Route path="/about" component={Home} />
           <Route path="/programs/flic" component={ProgramFLiC} />
           <Route path="/programs/hubs" component={ProgramHUBs} />
           <Route path="/programs/ai" component={ProgramAI} />
