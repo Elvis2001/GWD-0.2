@@ -171,7 +171,7 @@ export default function ProgramFLiC() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden h-64 group">
                   <img 
-                    src="https://i.pinimg.com/1200x/46/7e/00/467e006faf1aaceb1876a9c97d099a5d.jpg" 
+                    src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483004/gwd/flic/ukn0w4dy8nj9zh5iqa18.jpg"
                     alt="Students Setting Objectives" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -225,7 +225,7 @@ export default function ProgramFLiC() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden h-64 group">
                   <img 
-                    src="https://i.pinimg.com/1200x/d5/a5/6a/d5a56a9214c4b8d781d4b2eddcd19cd3.jpg" 
+                    src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483713/gwd/flic/gtz9146hxazvwyjkpcru.jpg"
                     alt="Blended Learning Delivery" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

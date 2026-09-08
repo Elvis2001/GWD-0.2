@@ -9,19 +9,19 @@ export default function Gallery() {
     {
       title: "FLiC Gallery",
       category: "Secondary Schools",
-      image: "https://i.pinimg.com/1200x/f3/4b/35/f34b3538f5b55c37425452f5a01f7602.jpg",
+      image: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773606784/gwd/activities/gbtyureeowjnt11a1hro.jpg",
       slug: "flic"
     },
     {
       title: "HUBs / Youth Tech Bootcamps",
       category: "Higher Institutions",
-      image: "https://i.pinimg.com/736x/ea/88/37/ea8837da8c1107875467a942d833d506.jpg",
+      image: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1776345931/gwd/blog/t7ek9nb2xpkhve7tbfl7.jpg",
       slug: "hubs"
     },
     {
       title: "Financial Literacy Games & Activities",
       category: "Workshops & Play",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
+      image: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1776345931/gwd/blog/qvjcfw4y8h9snu01csrd.jpg",
       slug: "activities"
     }
   ];

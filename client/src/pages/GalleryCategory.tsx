@@ -81,9 +81,14 @@ export default function GalleryCategory() {
               </motion.div>
             ))}
             {(items ?? []).length === 0 && (
-              <p className="col-span-3 text-center text-muted-foreground py-12">
-                No gallery items available for this category.
-              </p>
+              <div className="col-span-3 text-center text-muted-foreground py-12 space-y-2">
+                <p className="text-lg font-medium">
+                  No gallery items available for this category Yet.
+                </p>
+                <p className="text-sm">
+                  Coming Soon....
+                </p>
+              </div>
             )}
           </div>
         )}

@@ -491,7 +491,7 @@ export default function Home() {
             >
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                 <img 
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" 
+                  src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1778935396/gwd/flic/c0gii4hwmqp4wbbulabe.jpg" 
                   alt="Students Collaborating" 
                   className="w-full h-[400px] sm:h-[480px] object-cover"
                 />
@@ -714,7 +714,7 @@ export default function Home() {
             >
               <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-2" />
               <img 
-                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop" 
+                src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483498/gwd/flic/rac3lvpd6ssilrgoy575.jpg"
                 alt="Our Story Illustration" 
                 className="relative rounded-3xl shadow-xl w-full h-[360px] object-cover"
               />
