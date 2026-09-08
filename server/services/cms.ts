@@ -60,6 +60,11 @@ type UpsertInput = {
 };
 
 function mapDbPost(row: DbPost): CmsPost {
+  const primaryImage =
+    row.thumbnail_url ||
+    row.image_url ||
+    (row.gallery_images && row.gallery_images.length > 0 ? row.gallery_images[0] : "");
+
   return {
     id: row.id,
     title: row.title,
@@ -67,8 +72,8 @@ function mapDbPost(row: DbPost): CmsPost {
     category: row.category,
     excerpt: row.excerpt ?? "",
     content: row.content ?? "",
-    thumbnailImage: row.thumbnail_url ?? "",
-    coverImage: row.thumbnail_url ?? "",
+    thumbnailImage: primaryImage,
+    coverImage: primaryImage,
     galleryImages: row.gallery_images ?? [],
     featured: Boolean(row.featured),
     published: row.published ?? true,

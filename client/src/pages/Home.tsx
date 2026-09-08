@@ -35,6 +35,19 @@ export default function Home() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isSliderPaused, setIsSliderPaused] = useState(false);
 
+  // Real GWD Cloudinary activity fallback images
+  const GWD_FALLBACK_IMAGES = [
+    "https://res.cloudinary.com/di1wu0bs5/image/upload/v1778935396/gwd/flic/c0gii4hwmqp4wbbulabe.jpg",
+    "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483498/gwd/flic/rac3lvpd6ssilrgoy575.jpg",
+    "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483004/gwd/flic/ukn0w4dy8nj9zh5iqa18.jpg",
+    "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483713/gwd/flic/gtz9146hxazvwyjkpcru.jpg",
+    "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773606784/gwd/activities/gbtyureeowjnt11a1hro.jpg"
+  ];
+
+  const getPostImage = (p: any, fallback: string) => {
+    return p.coverImage || p.thumbnailImage || p.imageUrl || (p.galleryImages && p.galleryImages[0]) || fallback;
+  };
+
   // Fallback slides if backend posts are loading or empty
   const defaultActivitySlides = [
     {
@@ -42,7 +55,7 @@ export default function Home() {
       title: "Building Future Leaders Today",
       category: "EMPOWERING THE NEXT GENERATION",
       excerpt: "GWD Youth Foundation equips young minds with financial literacy, digital skills, and leadership training to create sustainable impact.",
-      coverImage: "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=2070&auto=format&fit=crop",
+      coverImage: GWD_FALLBACK_IMAGES[0],
       link: "/programs/flic",
       linkText: "Explore Programs"
     },
@@ -51,7 +64,7 @@ export default function Home() {
       title: "Financial Literacy Clubs & Youth Bootcamps",
       category: "FLiC INITIATIVE",
       excerpt: "Establishing high school & university clubs teaching savings, micro-investing, ethics, and youth entrepreneurship across Nigeria.",
-      coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
+      coverImage: GWD_FALLBACK_IMAGES[1],
       link: "/programs/flic",
       linkText: "Discover FLiC"
     },
@@ -60,7 +73,7 @@ export default function Home() {
       title: "AI & Digital Prompt Engineering Masterclasses",
       category: "FUTURE OF WORK",
       excerpt: "Empowering youth with cutting-edge artificial intelligence, prompt engineering, and digital career tools.",
-      coverImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop",
+      coverImage: GWD_FALLBACK_IMAGES[2],
       link: "/programs/ai",
       linkText: "Join AI Program"
     }
@@ -68,12 +81,12 @@ export default function Home() {
 
   // Dynamic slides built from live posts API or fallback
   const activitySlides = posts && posts.length > 0
-    ? posts.slice(0, 5).map(p => ({
+    ? posts.slice(0, 5).map((p, idx) => ({
         id: p.id,
         title: p.title,
         category: p.category ? p.category.toUpperCase() : "LATEST ACTIVITY",
         excerpt: p.excerpt || (p.content ? p.content.slice(0, 140) + "..." : ""),
-        coverImage: p.coverImage || "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=2070&auto=format&fit=crop",
+        coverImage: getPostImage(p, GWD_FALLBACK_IMAGES[idx % GWD_FALLBACK_IMAGES.length]),
         link: `/details/blog/${p.id}`,
         linkText: "Full Story Here"
       }))
@@ -361,7 +374,7 @@ export default function Home() {
                     <div className="rounded-t-2xl overflow-hidden aspect-video relative bg-gray-100">
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
                       <img 
-                        src={post.coverImage || "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=800&auto=format&fit=crop"} 
+                        src={getPostImage(post, GWD_FALLBACK_IMAGES[idx % GWD_FALLBACK_IMAGES.length])} 
                         alt={post.title} 
                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                       />
@@ -410,21 +423,21 @@ export default function Home() {
                   title: "Financial Literacy Summit Reaches 500+ High School Students",
                   category: "FLiC Bootcamp",
                   excerpt: "Interactive money management and micro-investment simulations held across schools.",
-                  img: "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=800&auto=format&fit=crop"
+                  img: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1773606784/gwd/activities/gbtyureeowjnt11a1hro.jpg"
                 },
                 {
                   id: "fb-2",
                   title: "GWD Campus HUBs Launched in Tertiary Institutions",
                   category: "Campus HUB",
                   excerpt: "Empowering university students with career mentorship and leadership networks.",
-                  img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop"
+                  img: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1776345931/gwd/blog/t7ek9nb2xpkhve7tbfl7.jpg"
                 },
                 {
                   id: "fb-3",
                   title: "AI Prompt Engineering Cohort Completes Certification",
                   category: "AI Training",
                   excerpt: "Over 200 youth mastered artificial intelligence prompt tools for future careers.",
-                  img: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop"
+                  img: "https://res.cloudinary.com/di1wu0bs5/image/upload/v1776345931/gwd/blog/qvjcfw4y8h9snu01csrd.jpg"
                 }
               ].map((fb, idx) => (
                 <motion.div
@@ -741,7 +754,7 @@ export default function Home() {
             >
               <div className="absolute inset-0 z-0">
                 <img 
-                  src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=2070&auto=format&fit=crop"
+                  src="https://res.cloudinary.com/di1wu0bs5/image/upload/v1773483498/gwd/flic/rac3lvpd6ssilrgoy575.jpg"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   alt="Students in Uniform"
                 />
