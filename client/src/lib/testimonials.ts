@@ -6,7 +6,7 @@ export const SKILLS_FOR_LADIES_EVENT = {
   name: "Skills for the 21st Century Lady",
   partner: "Mentors International",
   highlights: [
-    { value: "20", label: "Young women trained over three days" },
+    { value: "23", label: "Young women trained over three days" },
     { value: "91.5%", label: "Said the training inspired them" },
     { value: "40%", label: "Selected for a 6-month web training with Mentors International" },
   ],
