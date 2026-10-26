@@ -1,11 +1,32 @@
 import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
 import { SectionHeader } from "@/components/SectionHeader";
-import { ArrowLeft, Calendar, BookOpen, Trophy, ExternalLink, Download } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Trophy,
+  ExternalLink,
+  Download,
+  CheckCircle2,
+  Heart,
+  Link2,
+  MapPin,
+  UserRound,
+  Layers,
+} from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGalleryByCategory, usePosts } from "@/hooks/use-content";
 import { buildApiUrl } from "@/lib/api";
+import { DONATION_ASK } from "@/lib/site-stats";
+
+const PROGRAM_LINKS: Record<string, { label: string; href: string }> = {
+  flic: { label: "Financial Literacy Clubs (FLiC)", href: "/programs/flic" },
+  hubs: { label: "Campus HUBs", href: "/programs/hubs" },
+  ai: { label: "AI & Digital Skills", href: "/programs/ai" },
+  blog: { label: "News & Blog", href: "/blog" },
+};
 
 export default function DetailedView() {
   const [, params] = useRoute("/details/:type/:id");
@@ -14,6 +35,7 @@ export default function DetailedView() {
 
   const { data: galleryItems } = useGalleryByCategory(type);
   const { data: posts } = usePosts();
+  const [copied, setCopied] = useState(false);
   const item =
     galleryItems?.find((entry) => String(entry.id) === id) ??
     posts?.find((entry) => String(entry.id) === id) ??
@@ -35,11 +57,27 @@ export default function DetailedView() {
     : [item.thumbnailImage || item.coverImage].filter(Boolean);
   const displayImages = images.length > 0 ? images : ["/gwdlogox66x550xhr.png"];
 
-  const isBlogPost = item.category === "blog" || item.contentType === "post";
-  const keyActivities = item.keyActivities ?? [];
-  const hasKeyActivities = keyActivities.length > 0;
-  const hasImpactReport = Boolean(item.impactReport && item.impactReport.trim().length > 0);
+  // impactPoints comes pre-split from the API; fall back to the raw report for older API builds.
+  const impactPoints =
+    item.impactPoints ?? (item.impactReport?.trim() ? [item.impactReport.trim()] : []);
   const hasResourcePdf = Boolean(item.resourcePdfUrl);
+  const program = PROGRAM_LINKS[item.category] ?? { label: "Gallery", href: `/gallery/${item.category}` };
+  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareText = encodeURIComponent(`${item.title} — GWD Youth Foundation`);
+  const shareLinks = [
+    { label: "WhatsApp", href: `https://wa.me/?text=${shareText}%20${encodeURIComponent(pageUrl)}` },
+    { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}` },
+    { label: "X", href: `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(pageUrl)}` },
+  ];
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(pageUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard can be unavailable (insecure context); nothing to do.
+    }
+  };
   const facilitatorName = item.category === "flic" ? item.author?.trim() : "";
   const resourceViewUrl = buildApiUrl(`/api/resources/${encodeURIComponent(String(item.id))}/view`);
   const resourceDownloadUrl = buildApiUrl(
@@ -95,37 +133,22 @@ export default function DetailedView() {
                   </div>
                 )}
                 <p className="text-gray-600 leading-relaxed text-lg mb-8">{item.content}</p>
-                {(!isBlogPost || hasKeyActivities || hasImpactReport) && (
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {(!isBlogPost || hasKeyActivities) && (
-                      <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                          <BookOpen className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-xl font-bold mb-4">Key Activities</h3>
-                        <ul className="space-y-3">
-                          {keyActivities.map((activity, i) => (
-                            <li key={i} className="text-gray-600 text-sm">
-                              {activity}
-                            </li>
-                          ))}
-                          {!hasKeyActivities && (
-                            <li className="text-gray-400 text-sm">No key activities listed.</li>
-                          )}
-                        </ul>
+                {impactPoints.length > 0 && (
+                  <div className="bg-gray-900 p-8 md:p-10 rounded-3xl text-white">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-primary shrink-0">
+                        <Trophy className="w-6 h-6" />
                       </div>
-                    )}
-                    {(!isBlogPost || hasImpactReport) && (
-                      <div className="bg-gray-900 p-8 rounded-3xl text-white">
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-primary mb-6">
-                          <Trophy className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-xl font-bold mb-4">Impact Report</h3>
-                        <p className="text-gray-400 text-sm leading-relaxed">
-                          {item.impactReport || "No impact report attached yet."}
-                        </p>
-                      </div>
-                    )}
+                      <h3 className="text-xl font-bold">Impact Report</h3>
+                    </div>
+                    <ul className="grid md:grid-cols-2 gap-x-8 gap-y-4">
+                      {impactPoints.map((point, i) => (
+                        <li key={i} className="flex items-start gap-3 text-gray-300 text-sm leading-relaxed">
+                          <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
                 {hasResourcePdf && (
@@ -172,6 +195,85 @@ export default function DetailedView() {
               </div>
             </div>
           </div>
+
+          <aside className="lg:sticky lg:top-28 h-fit space-y-6">
+            <Card className="border-none shadow-xl rounded-3xl bg-white">
+              <CardContent className="p-8 space-y-5">
+                <h3 className="text-lg font-bold">At a glance</h3>
+                <div className="flex items-start gap-3 text-sm">
+                  <Layers className="w-5 h-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-gray-500">Program</p>
+                    <Link href={program.href} className="font-semibold text-gray-900 hover:text-primary">
+                      {program.label}
+                    </Link>
+                  </div>
+                </div>
+                {item.name && (
+                  <div className="flex items-start gap-3 text-sm">
+                    <MapPin className="w-5 h-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-gray-500">School / venue</p>
+                      <p className="font-semibold text-gray-900">{item.name}</p>
+                    </div>
+                  </div>
+                )}
+                {facilitatorName && (
+                  <div className="flex items-start gap-3 text-sm">
+                    <UserRound className="w-5 h-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-gray-500">Facilitated by</p>
+                      <p className="font-semibold text-gray-900">{facilitatorName}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-3 text-sm">
+                  <Calendar className="w-5 h-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-gray-500">Date</p>
+                    <p className="font-semibold text-gray-900">
+                      {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "Recent"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-5 border-t border-gray-100">
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Share this story</p>
+                  <div className="flex flex-wrap gap-2">
+                    {shareLinks.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-primary hover:text-white text-xs font-semibold transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                    <button
+                      onClick={copyLink}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-primary hover:text-white text-xs font-semibold transition-colors"
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                      {copied ? "Copied" : "Copy link"}
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="rounded-3xl bg-gray-900 text-white p-8">
+              <Heart className="w-7 h-7 text-primary mb-3" />
+              <h3 className="text-lg font-bold mb-2">Make the next session happen</h3>
+              <p className="text-sm text-gray-300 mb-5">
+                {DONATION_ASK.amount} {DONATION_ASK.outcome}.
+              </p>
+              <Button asChild className="w-full rounded-full">
+                <Link href="/donate">Donate</Link>
+              </Button>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

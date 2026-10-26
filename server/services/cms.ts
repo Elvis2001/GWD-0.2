@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { buildSlug } from "../lib/slug";
+import { parseImpactPoints } from "../lib/impact";
 import type {
   CmsPost,
   CmsProgram,
@@ -82,6 +83,7 @@ function mapDbPost(row: DbPost): CmsPost {
     role: row.role ?? undefined,
     imageUrl: row.image_url ?? undefined,
     impactReport: row.impact_report ?? undefined,
+    impactPoints: parseImpactPoints(row.impact_report),
     resourcePdfUrl: row.resource_pdf_url ?? undefined,
     resourcePdfName: row.resource_pdf_name ?? undefined,
     keyActivities: row.key_activities ?? [],

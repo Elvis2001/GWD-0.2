@@ -169,7 +169,7 @@ export default function AdminDashboard() {
         content:
           "Write full FLIC report: school context, what students learned, and measurable outcome.",
         author: "Program lead name (e.g. Jane Doe)",
-        impactReport: "Impact snapshot (e.g. 120 students trained, 3 schools reached).",
+        impactReport: "e.g.\n120 students trained\n3 schools reached",
         keyActivities: "Comma-separated (e.g. budgeting basics, savings challenge, Q&A)",
         thumbnailLabel: "FLIC cover image",
         galleryLabel: "FLIC activity photos (optional)",
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
         content:
           "Describe the HUB session in detail: objective, sessions delivered, and outcomes.",
         author: "Facilitator or coordinator name",
-        impactReport: "Impact snapshot (e.g. 45 participants, 2 prototypes built).",
+        impactReport: "e.g.\n45 participants\n2 prototypes built",
         keyActivities: "Comma-separated (e.g. design sprint, mentorship circle, demo day)",
         thumbnailLabel: "HUB cover image",
         galleryLabel: "HUB session photos (optional)",
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
         content:
           "Write activity details: setup, engagement format, and what changed after the session.",
         author: "Activity owner name",
-        impactReport: "Impact snapshot (e.g. 80 attendees, 60% improved quiz score).",
+        impactReport: "e.g.\n80 attendees\n60% improved quiz score",
         keyActivities: "Comma-separated (e.g. spending audit, goal planning, reflection)",
         thumbnailLabel: "Activity cover image",
         galleryLabel: "Activity photos (optional)",
@@ -533,11 +533,13 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">{sectionLabel[category]} Impact Report</label>
-                    <Input
+                    <Textarea
+                      rows={4}
                       placeholder={fieldCopy[category].impactReport}
                       value={form.impactReport}
                       onChange={(e) => setForm((prev) => ({ ...prev, impactReport: e.target.value }))}
                     />
+                    <p className="text-xs text-gray-500">One point per line. Each line shows as a bullet on the post.</p>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">{sectionLabel[category]} Key Activities</label>
