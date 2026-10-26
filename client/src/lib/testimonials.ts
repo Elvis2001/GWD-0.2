@@ -8,7 +8,7 @@ export const SKILLS_FOR_LADIES_EVENT = {
   highlights: [
     { value: "23", label: "Young women trained over three days" },
     { value: "91.5%", label: "Said the training inspired them" },
-    { value: "40%", label: "Selected for a 6-month web training with Mentors International" },
+    { value: "9", label: "Of the 23 (about 40%) selected for a 6-month web training with Mentors International" },
   ],
   featuredQuote: {
     name: "Deborah",
