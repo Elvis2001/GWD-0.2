@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -17,10 +17,13 @@ import {
   Handshake,
   Quote,
   Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { SectionHeader } from "@/components/SectionHeader";
 import { usePosts, useTestimonials } from "@/hooks/use-content";
 import { IMPACT_STATS, STATS_AS_OF, PARTNERS, DONATION_ASK, formatStat } from "@/lib/site-stats";
+import { EVENT_TESTIMONIALS, SKILLS_FOR_LADIES_EVENT, type EventTestimonial } from "@/lib/testimonials";
 import type { Post } from "@shared/types";
 
 // Real GWD Cloudinary activity photos
@@ -69,26 +72,7 @@ const PROGRAMS = [
   },
 ];
 
-const SAMPLE_TESTIMONIALS = [
-  {
-    id: "sample-1",
-    name: "Aisha Bello",
-    role: "Student",
-    content:
-      "GWD's programs opened doors for me — I learned financial skills and gained confidence to start my own small business.",
-    imageUrl: "",
-  },
-  {
-    id: "sample-2",
-    name: "Chinedu Okafor",
-    role: "Parent",
-    content:
-      "I've seen my child's focus and ambition grow since joining GWD. The mentorship and resources are invaluable.",
-    imageUrl: "",
-  },
-];
-
-const CORE_VALUES =["Focus", "Commitment", "Discipline", "We can do it", "Excellence", "Respect", "Fun"];
+const CORE_VALUES = ["Focus", "Commitment", "Discipline", "We can do it", "Excellence", "Respect", "Fun"];
 
 function getPostImage(post: Post, fallback: string) {
   return post.coverImage || post.thumbnailImage || post.imageUrl || post.galleryImages?.[0] || fallback;
@@ -98,6 +82,135 @@ function formatDate(value: Post["createdAt"]) {
   return value
     ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : "Recent";
+}
+
+type PostShowcaseProps = {
+  subtitle: string;
+  title: string;
+  description: string;
+  linkHref: string;
+  linkText: string;
+  posts: Post[];
+  accent: "primary" | "secondary";
+  className?: string;
+  children?: ReactNode;
+};
+
+// Featured post on the left, smaller post cards (plus optional extra content) on the right.
+function PostShowcase({ subtitle, title, description, linkHref, linkText, posts, accent, className, children }: PostShowcaseProps) {
+  const [featured, ...others] = posts;
+  if (!featured) return null;
+  const badge = accent === "primary" ? "bg-primary" : "bg-secondary";
+  const label = accent === "primary" ? "text-primary" : "text-secondary";
+
+  return (
+    <section className={className}>
+      <div className="container-custom">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+          <SectionHeader title={title} subtitle={subtitle} description={description} className="mb-0" centered={false} />
+          <Link href={linkHref} className={`inline-flex items-center font-bold ${label} hover:opacity-80 gap-2`}>
+            {linkText} <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-8">
+          <Link
+            href={`/details/${featured.category}/${featured.id}`}
+            className="lg:col-span-7 group relative rounded-3xl overflow-hidden shadow-xl min-h-[380px] flex items-end"
+          >
+            <img
+              src={getPostImage(featured, GWD_IMAGES[0])}
+              alt={featured.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="relative p-8 text-white">
+              <div className="flex items-center gap-3 text-xs font-semibold mb-3">
+                <span className={`px-3 py-1 rounded-full ${badge} uppercase tracking-wide`}>
+                  {featured.category || "Update"}
+                </span>
+                <span className="flex items-center gap-1.5 text-gray-200">
+                  <Calendar className="w-3.5 h-3.5" /> {formatDate(featured.createdAt)}
+                </span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{featured.title}</h3>
+              <p className="text-gray-200 text-sm line-clamp-2 max-w-xl">{featured.excerpt || featured.content}</p>
+            </div>
+          </Link>
+
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            {others.map((post, idx) => (
+              <Link
+                key={post.id}
+                href={`/details/${post.category}/${post.id}`}
+                className="group flex gap-4 bg-white rounded-2xl p-4 border border-gray-100 hover:shadow-lg transition-all"
+              >
+                <img
+                  src={getPostImage(post, GWD_IMAGES[(idx + 1) % GWD_IMAGES.length])}
+                  alt={post.title}
+                  className="w-28 h-28 rounded-xl object-cover shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className={`text-xs font-bold ${label} uppercase tracking-wide mb-1`}>
+                    {post.category || "Update"} · {formatDate(post.createdAt)}
+                  </p>
+                  <h4 className="font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                    {post.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 line-clamp-2">{post.excerpt || post.content}</p>
+                </div>
+              </Link>
+            ))}
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialCard({ item }: { item: EventTestimonial }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = item.content.length > 300;
+
+  return (
+    <figure className="snap-start shrink-0 w-[85%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white rounded-3xl border border-gray-100 shadow-lg p-7 flex flex-col">
+      <figcaption className="flex items-center gap-4 mb-5">
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            loading="lazy"
+            className="w-16 h-16 rounded-full object-cover ring-4 ring-secondary/30 shrink-0"
+          />
+        ) : (
+          <div className="w-16 h-16 rounded-full bg-primary/10 text-primary text-xl font-bold flex items-center justify-center shrink-0">
+            {item.name.charAt(0)}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="font-bold text-gray-900 leading-tight">{item.name}</p>
+          {item.role && <p className="text-xs text-gray-500 mt-1">{item.role}</p>}
+        </div>
+      </figcaption>
+      <Quote className="w-7 h-7 text-secondary/60 mb-3" />
+      <blockquote
+        className={`text-gray-700 text-[15px] leading-relaxed whitespace-pre-line flex-1 ${
+          isLong && !expanded ? "line-clamp-6" : ""
+        }`}
+      >
+        {item.content}
+      </blockquote>
+      {isLong && (
+        <button
+          onClick={() => setExpanded((prev) => !prev)}
+          className="mt-4 self-start text-sm font-bold text-primary hover:text-green-700"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </figure>
+  );
 }
 
 export default function Home() {
@@ -123,13 +236,28 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const latestPosts = Array.isArray(posts) ? posts.slice(0, 3) : [];
-  const [featuredPost, ...secondaryPosts] = latestPosts;
+  const allPosts = Array.isArray(posts) ? posts : [];
+  const activityPosts = allPosts.filter((post) => post.category !== "blog").slice(0, 3);
+  const blogPosts = allPosts.filter((post) => post.category === "blog").slice(0, 4);
+  const testimonialTrack = useRef<HTMLDivElement>(null);
+  const scrollTestimonials = (direction: 1 | -1) => {
+    const track = testimonialTrack.current;
+    if (track) track.scrollBy({ left: direction * track.clientWidth * 0.9, behavior: "smooth" });
+  };
   const impactPost = Array.isArray(posts)
     ? posts.find((post) => (post.impactPoints?.length ?? 0) >= 2)
     : undefined;
-  // CMS testimonials first, then the existing sample quotes so the section always shows.
-  const allTestimonials = [...(Array.isArray(testimonials) ? testimonials : []), ...SAMPLE_TESTIMONIALS];
+  // Testimonials added in the CMS first, then those from the Skills for the 21st Century Lady impact book.
+  const allTestimonials: EventTestimonial[] = [
+    ...(Array.isArray(testimonials) ? testimonials : []).map((item) => ({
+      id: `cms-${item.id}`,
+      name: item.name,
+      role: item.role ?? "",
+      content: item.content,
+      imageUrl: item.imageUrl ?? "",
+    })),
+    ...EVENT_TESTIMONIALS,
+  ];
 
   return (
     <div className="overflow-x-hidden bg-gray-50/50">
@@ -252,12 +380,13 @@ export default function Home() {
       </section>
 
       {/* 3. Programs */}
-      <section id="programs" className="section-padding bg-gray-50/60 scroll-mt-20">
+      <section id="programs" className="pt-10 pb-16 md:pt-14 md:pb-20 bg-gray-50/60 scroll-mt-20">
         <div className="container-custom">
           <SectionHeader
             title="Three programs, one goal"
             subtitle="What we do"
             description="Every program builds practical money and digital skills, matched to where young people are in their education."
+            className="mb-8"
           />
           <div className="grid md:grid-cols-3 gap-8">
             {PROGRAMS.map((program, idx) => (
@@ -305,109 +434,60 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. Latest from the field + latest impact report */}
-      {featuredPost && (
-        <section className="section-padding bg-white">
-          <div className="container-custom">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
-              <SectionHeader
-                title="Latest from the field"
-                subtitle="News & updates"
-                description="Real sessions, real schools, reported by our facilitators."
-                className="mb-0"
-                centered={false}
-              />
-              <Link href="/blog" className="inline-flex items-center font-bold text-primary hover:text-green-700 gap-2">
-                View all updates <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="grid lg:grid-cols-12 gap-8">
-              <Link
-                href={`/details/blog/${featuredPost.id}`}
-                className="lg:col-span-7 group relative rounded-3xl overflow-hidden shadow-xl min-h-[380px] flex items-end"
-              >
-                <img
-                  src={getPostImage(featuredPost, GWD_IMAGES[0])}
-                  alt={featuredPost.title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="relative p-8 text-white">
-                  <div className="flex items-center gap-3 text-xs font-semibold mb-3">
-                    <span className="px-3 py-1 rounded-full bg-primary uppercase tracking-wide">
-                      {featuredPost.category || "Update"}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-gray-200">
-                      <Calendar className="w-3.5 h-3.5" /> {formatDate(featuredPost.createdAt)}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{featuredPost.title}</h3>
-                  <p className="text-gray-200 text-sm line-clamp-2 max-w-xl">
-                    {featuredPost.excerpt || featuredPost.content}
-                  </p>
-                </div>
-              </Link>
-
-              <div className="lg:col-span-5 flex flex-col gap-6">
-                {secondaryPosts.map((post, idx) => (
-                  <Link
-                    key={post.id}
-                    href={`/details/blog/${post.id}`}
-                    className="group flex gap-4 bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:shadow-lg transition-all"
-                  >
-                    <img
-                      src={getPostImage(post, GWD_IMAGES[(idx + 1) % GWD_IMAGES.length])}
-                      alt={post.title}
-                      className="w-28 h-28 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-primary uppercase tracking-wide mb-1">
-                        {post.category || "Update"} · {formatDate(post.createdAt)}
-                      </p>
-                      <h4 className="font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 mb-1">
-                        {post.title}
-                      </h4>
-                      <p className="text-xs text-gray-500 line-clamp-2">{post.excerpt || post.content}</p>
-                    </div>
-                  </Link>
-                ))}
-
-                {impactPost && (
-                  <div className="bg-gray-900 text-white rounded-2xl p-6 flex-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary">
-                        <Trophy className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-widest text-primary">Latest impact report</p>
-                        <p className="text-sm text-gray-300 truncate">{impactPost.name || impactPost.title}</p>
-                      </div>
-                    </div>
-                    <ul className="space-y-2.5 mb-4">
-                      {impactPost.impactPoints!.slice(0, 4).map((point, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
-                          <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          <span>{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href={`/details/blog/${impactPost.id}`}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-primary"
-                    >
-                      Read the full report <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
+      {/* 4. Latest from the field (program activities) + latest impact report */}
+      <PostShowcase
+        className="section-padding bg-white"
+        subtitle="Recent activity"
+        title="Latest from the field"
+        description="Real sessions, real schools, reported by our facilitators."
+        linkHref="/gallery"
+        linkText="View all activities"
+        posts={activityPosts}
+        accent="primary"
+      >
+        {impactPost && (
+          <div className="bg-gray-900 text-white rounded-2xl p-6 flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">Latest impact report</p>
+                <p className="text-sm text-gray-300 truncate">{impactPost.name || impactPost.title}</p>
               </div>
             </div>
+            <ul className="space-y-2.5 mb-4">
+              {impactPost.impactPoints!.slice(0, 4).map((point, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={`/details/${impactPost.category}/${impactPost.id}`}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-primary"
+            >
+              Read the full report <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-        </section>
-      )}
+        )}
+      </PostShowcase>
 
-      {/* 5. Who we are (short) — full story lives on /about */}
-      <section className="section-padding bg-gray-50/60">
+      {/* 5. From the blog */}
+      <PostShowcase
+        className="section-padding bg-gray-50/60"
+        subtitle="Blog"
+        title="From our blog"
+        description="Stories, milestones and announcements from the GWD team."
+        linkHref="/blog"
+        linkText="Read the blog"
+        posts={blogPosts}
+        accent="secondary"
+      />
+
+      {/* 6. Who we are (short) — full story lives on /about */}
+      <section className="section-padding bg-white">
         <div className="container-custom grid lg:grid-cols-2 gap-12 items-center">
           <motion.img
             initial={{ opacity: 0, x: -30 }}
@@ -440,7 +520,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Vision banner */}
+      {/* 7. Vision banner */}
       <section className="relative overflow-hidden bg-gradient-to-br from-green-700 via-primary to-emerald-500 py-24 md:py-32 text-white">
         <div
           className="absolute inset-0 opacity-15 pointer-events-none"
@@ -493,39 +573,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. Testimonials */}
-      <section className="section-padding bg-white">
-          <div className="container-custom">
-            <SectionHeader
-              title="In their own words"
-              subtitle="Testimonials"
-              description="Students, parents and educators on what changed for them."
-            />
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allTestimonials.map((item) => (
-                <figure key={item.id} className="bg-gray-50 p-8 rounded-2xl border border-gray-100 flex flex-col">
-                  <Quote className="w-8 h-8 text-primary/40 mb-4" />
-                  <blockquote className="text-gray-700 leading-relaxed flex-1 mb-6">"{item.content}"</blockquote>
-                  <figcaption className="flex items-center gap-3">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} className="w-11 h-11 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">
-                        {item.name.charAt(0)}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-bold text-gray-900">{item.name}</p>
-                      {item.role && <p className="text-sm text-gray-500">{item.role}</p>}
-                    </div>
-                  </figcaption>
-                </figure>
+      {/* 8. Testimonials */}
+      <section className="section-padding bg-gray-50/60 overflow-hidden">
+        <div className="container-custom">
+          <SectionHeader
+            title="In their own words"
+            subtitle="Testimonials"
+            description={`Participants of ${SKILLS_FOR_LADIES_EVENT.name}, our three-day digital skills and money seminar with ${SKILLS_FOR_LADIES_EVENT.partner} in Yola.`}
+          />
+
+          <div className="grid lg:grid-cols-12 gap-6 mb-12">
+            <div className="lg:col-span-7 relative rounded-3xl bg-gray-900 text-white p-8 sm:p-10 overflow-hidden">
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-secondary/25 blur-3xl pointer-events-none" />
+              <Quote className="w-10 h-10 text-secondary mb-4" />
+              <p className="relative text-xl sm:text-2xl font-bold leading-snug font-heading">
+                "{SKILLS_FOR_LADIES_EVENT.featuredQuote.content}"
+              </p>
+              <p className="relative mt-5 text-secondary font-bold">
+                {SKILLS_FOR_LADIES_EVENT.featuredQuote.name}
+                <span className="text-gray-400 font-medium">, {SKILLS_FOR_LADIES_EVENT.name}</span>
+              </p>
+            </div>
+            <div className="lg:col-span-5 grid grid-cols-3 lg:grid-cols-1 gap-4">
+              {SKILLS_FOR_LADIES_EVENT.highlights.map((highlight) => (
+                <div
+                  key={highlight.label}
+                  className="rounded-2xl bg-white border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-4"
+                >
+                  <p className="text-2xl sm:text-3xl font-extrabold text-primary font-heading lg:w-24 shrink-0">
+                    {highlight.value}
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-snug">{highlight.label}</p>
+                </div>
               ))}
             </div>
           </div>
+
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-sm font-semibold text-gray-500">{allTestimonials.length} participant stories</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => scrollTestimonials(-1)}
+                aria-label="Previous testimonials"
+                className="w-11 h-11 rounded-full bg-white border border-gray-200 hover:bg-primary hover:text-white hover:border-primary flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => scrollTestimonials(1)}
+                aria-label="Next testimonials"
+                className="w-11 h-11 rounded-full bg-white border border-gray-200 hover:bg-primary hover:text-white hover:border-primary flex items-center justify-center transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          <div
+            ref={testimonialTrack}
+            className="flex items-start gap-6 overflow-x-auto snap-x snap-mandatory pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {allTestimonials.map((item) => (
+              <TestimonialCard key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* 8. Get involved */}
+      {/* 9. Get involved */}
       <section className="py-20 bg-gray-950 text-white relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none" />
         <div className="container-custom relative z-10">
