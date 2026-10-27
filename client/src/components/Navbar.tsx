@@ -27,6 +27,9 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Light mode always uses the solid white bar; dark mode stays see-through over the hero until scrolled.
+  const solid = scrolled || theme === "light";
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsOpen(false);
@@ -37,8 +40,8 @@ export function Navbar() {
     <nav
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300",
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-md py-3"
+        solid
+          ? "bg-white shadow-md py-3"
           : "bg-black/40 backdrop-blur-md py-5"
       )}
     >
@@ -47,7 +50,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 z-50">
           <div className={cn(
             "font-bold text-2xl tracking-tighter transition-colors",
-            scrolled ? "text-primary" : "text-white"
+            solid ? "text-primary" : "text-white"
           )}>
             <img src="gwdlogox66x550xhr.png" alt="GWDYF Logo" className="h-10 w-auto" />
           </div>
@@ -57,7 +60,7 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-8">
           <Link href="/" className={cn(
             "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
+            solid ? "text-gray-800" : "text-white/90",
             location === "/" && "text-secondary"
           )}>
             Home
@@ -71,7 +74,7 @@ export function Navbar() {
 
           <Link href="/about" className={cn(
             "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
+            solid ? "text-gray-800" : "text-white/90",
             location === "/about" && "text-secondary"
           )}>
             About
@@ -87,7 +90,7 @@ export function Navbar() {
           <div className="relative group">
             <button className={cn(
               "flex items-center gap-1 text-sm font-semibold hover:text-secondary transition-colors group-hover:text-secondary relative py-1",
-              scrolled ? "text-gray-800" : "text-white/90",
+              solid ? "text-gray-800" : "text-white/90",
               location.startsWith("/programs") && "text-secondary"
             )}>
               Our Programs <ChevronDown className="w-4 h-4" />
@@ -114,7 +117,7 @@ export function Navbar() {
 
           <Link href="/gallery" className={cn(
             "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
+            solid ? "text-gray-800" : "text-white/90",
             location === "/gallery" && "text-secondary"
           )}>
             Gallery
@@ -128,7 +131,7 @@ export function Navbar() {
 
           <Link href="/blog" className={cn(
             "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
+            solid ? "text-gray-800" : "text-white/90",
             location === "/blog" && "text-secondary"
           )}>
             News & Blog
@@ -142,7 +145,7 @@ export function Navbar() {
 
           <Link href="/contact" className={cn(
             "text-sm font-semibold hover:text-secondary transition-colors relative py-1",
-            scrolled ? "text-gray-800" : "text-white/90",
+            solid ? "text-gray-800" : "text-white/90",
             location === "/contact" && "text-secondary"
           )}>
             Contact
@@ -162,7 +165,7 @@ export function Navbar() {
             onClick={toggleTheme}
             className={cn(
               "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
-              scrolled
+              solid
                 ? "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
                 : "border-white/30 bg-white/10 text-white hover:bg-white/20",
             )}
@@ -173,7 +176,7 @@ export function Navbar() {
           </button>
           <Link href="/get-involved" className={cn(
             "px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-lg",
-            scrolled 
+            solid 
               ? "bg-primary text-white hover:bg-primary/90 hover:shadow-primary/30" 
               : "bg-white text-primary hover:bg-gray-100"
           )}>
@@ -186,7 +189,7 @@ export function Navbar() {
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "lg:hidden p-2 rounded-md z-50 relative",
-            scrolled ? "text-gray-800" : "text-white"
+            solid ? "text-gray-800" : "text-white"
           )}
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
