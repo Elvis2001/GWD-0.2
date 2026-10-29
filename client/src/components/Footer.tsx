@@ -36,8 +36,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
           <div className="space-y-4">
-            <Link href="/" className="text-2xl font-bold tracking-tighter">
-              GWD<span className="text-secondary">YF</span>
+            <Link href="/" className="inline-block">
+              <img src="/gwd-logo-light.png" alt="Grow With Data Youth Foundation logo" className="h-24 w-auto" />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               Empowering youth through financial literacy, leadership development, and digital skills for a sustainable future.

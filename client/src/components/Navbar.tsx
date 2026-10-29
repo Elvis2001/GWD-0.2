@@ -48,12 +48,11 @@ export function Navbar() {
       <div className="container-custom flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 z-50">
-          <div className={cn(
-            "font-bold text-2xl tracking-tighter transition-colors",
-            solid ? "text-primary" : "text-white"
-          )}>
-            <img src="gwdlogox66x550xhr.png" alt="GWDYF Logo" className="h-10 w-auto" />
-          </div>
+          <img
+            src={solid ? "/gwd-logo.png" : "/gwd-logo-light.png"}
+            alt="Grow With Data Youth Foundation logo"
+            className="h-14 md:h-16 w-auto"
+          />
         </Link>
 
         {/* Desktop Menu */}

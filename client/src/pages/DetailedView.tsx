@@ -55,7 +55,7 @@ export default function DetailedView() {
   const images = item.galleryImages?.length
     ? item.galleryImages
     : [item.thumbnailImage || item.coverImage].filter(Boolean);
-  const displayImages = images.length > 0 ? images : ["/gwdlogox66x550xhr.png"];
+  const displayImages = images.length > 0 ? images : ["/gwd-logo.png"];
 
   // impactPoints comes pre-split from the API; fall back to the raw report for older API builds.
   const impactPoints =
