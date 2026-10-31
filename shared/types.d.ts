@@ -61,6 +61,7 @@ export interface ContactMessage {
   phone: string | null;
   subject: string;
   message: string;
+  readAt?: Date | string | null;
   createdAt: Date | string | null;
 }
 

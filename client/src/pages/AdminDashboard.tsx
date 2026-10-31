@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Edit3, FileText, LogOut, Newspaper, Plus, Save, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit3, FileText, LogOut, Mail, Newspaper, Plus, Reply, Save, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,17 @@ import {
   createAdminResource,
   createAdminPost,
   createAdminProgram,
+  deleteAdminMessage,
   deleteAdminPost,
   getAdminPost,
+  listAdminMessages,
   listAdminPosts,
   listAdminResources,
+  setAdminMessageRead,
   updateAdminPost,
   type AdminPostSummary,
 } from "@/lib/admin-api";
+import type { ContactMessage } from "@shared/types";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { PROGRAM_AREAS } from "@/lib/program-areas";
@@ -25,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 type ProgramCategory = "flic" | "hubs" | "activities" | "blog";
 type AdminTab = ProgramCategory | "resources";
+type AdminSection = "posts" | "resources" | "messages";
 
 type FormState = {
   title: string;
@@ -118,11 +123,14 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loadingEditId, setLoadingEditId] = useState<string | null>(null);
-  const [section, setSection] = useState<"posts" | "resources">("posts");
+  const [section, setSection] = useState<AdminSection>("posts");
   const [view, setView] = useState<"list" | "form">("list");
   const [search, setSearch] = useState("");
   const [programFilter, setProgramFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [openMessageId, setOpenMessageId] = useState<number | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -229,7 +237,7 @@ export default function AdminDashboard() {
     toast({ title: "Logged Out", description: "Session ended." });
   };
 
-  const openSection = (next: "posts" | "resources") => {
+  const openSection = (next: AdminSection) => {
     setSection(next);
     setView("list");
     setEditingId(null);
@@ -270,9 +278,68 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      setMessages(await listAdminMessages());
+    } catch (error) {
+      toast({
+        title: "Could not load messages",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
   useEffect(() => {
     void loadPosts();
+    void loadMessages();
   }, []);
+
+  const setMessageRead = async (message: ContactMessage, read: boolean) => {
+    const previous = message.readAt ?? null;
+    const patch = (readAt: string | Date | null) =>
+      setMessages((prev) => prev.map((row) => (row.id === message.id ? { ...row, readAt } : row)));
+    patch(read ? new Date().toISOString() : null);
+    try {
+      await setAdminMessageRead(message.id, read);
+    } catch (error) {
+      patch(previous);
+      toast({
+        title: "Could not update message",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenMessage = (message: ContactMessage) => {
+    const opening = openMessageId !== message.id;
+    setOpenMessageId(opening ? message.id : null);
+    if (opening && !message.readAt) void setMessageRead(message, true);
+  };
+
+  const handleMarkUnread = (message: ContactMessage) => {
+    setOpenMessageId(null);
+    void setMessageRead(message, false);
+  };
+
+  const handleDeleteMessage = async (message: ContactMessage) => {
+    if (!window.confirm(`Delete the message from ${message.name}?`)) return;
+    try {
+      await deleteAdminMessage(message.id);
+      setMessages((prev) => prev.filter((row) => row.id !== message.id));
+      toast({ title: "Deleted", description: "Message removed." });
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Request failed.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleStartEdit = async (id: string | number) => {
     const postId = String(id);
@@ -458,7 +525,7 @@ export default function AdminDashboard() {
     });
   }, [allPosts, search, typeFilter, programFilter]);
 
-  const formatDate = (value: string | null): string => {
+  const formatDate = (value: string | Date | null): string => {
     if (!value) return "Unknown date";
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return "Unknown date";
@@ -467,11 +534,15 @@ export default function AdminDashboard() {
 
   const labelClass = "text-sm font-medium";
   const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
-  const category = activeTab as ProgramCategory;
+  // postForm is built on every render, so it needs a valid type on the Resources screen too.
+  const category: ProgramCategory = activeTab === "resources" ? "flic" : activeTab;
+
+  const unreadCount = messages.filter((message) => !message.readAt).length;
 
   const navItems = [
     { key: "posts" as const, label: "Posts", icon: <Newspaper className="w-4 h-4" /> },
     { key: "resources" as const, label: "Resources", icon: <FileText className="w-4 h-4" /> },
+    { key: "messages" as const, label: "Messages", icon: <Mail className="w-4 h-4" /> },
   ];
 
   const stats = [
@@ -882,6 +953,67 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const messageList = (
+    <div>
+      <h2 className="text-2xl font-bold mb-6">Messages</h2>
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        {loadingMessages && loadingRow}
+        {!loadingMessages && messages.length === 0 && (
+          <p className="px-4 py-10 text-sm text-center text-muted-foreground">
+            Messages from the Contact page will appear here.
+          </p>
+        )}
+        {!loadingMessages &&
+          messages.map((message) => (
+            <div key={message.id} className="border-b border-border last:border-0">
+              <button
+                type="button"
+                onClick={() => handleOpenMessage(message)}
+                aria-expanded={openMessageId === message.id}
+                className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-muted/50"
+              >
+                <span
+                  className={cn("mt-1.5 w-2 h-2 rounded-full shrink-0", message.readAt ? "bg-transparent" : "bg-primary")}
+                  aria-label={message.readAt ? undefined : "Unread"}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block text-sm truncate", !message.readAt && "font-bold")}>{message.subject}</span>
+                  <span className="block text-xs text-muted-foreground truncate mt-1">
+                    {message.name} · {message.email}
+                  </span>
+                </span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(message.createdAt)}</span>
+              </button>
+              {openMessageId === message.id && (
+                <div className="px-9 pb-4">
+                  <p className="text-sm whitespace-pre-wrap break-words mb-3">{message.message}</p>
+                  {message.phone && <p className="text-xs text-muted-foreground mb-3">Phone: {message.phone}</p>}
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild size="sm">
+                      <a href={`mailto:${message.email}?subject=${encodeURIComponent(`Re: ${message.subject}`)}`}>
+                        <Reply className="w-4 h-4 mr-2" /> Reply
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleMarkUnread(message)}>
+                      Mark as unread
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-red-600"
+                      onClick={() => handleDeleteMessage(message)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pt-28 pb-16 bg-background text-foreground min-h-screen">
       <div className="container-custom grid lg:grid-cols-[200px_minmax(0,1fr)] gap-8">
@@ -902,6 +1034,9 @@ export default function AdminDashboard() {
                 )}
               >
                 {item.icon} {item.label}
+                {item.key === "messages" && unreadCount > 0 && (
+                  <span className="ml-auto rounded-full bg-primary/10 text-primary text-xs px-2">{unreadCount}</span>
+                )}
               </button>
             ))}
             <button
@@ -914,9 +1049,11 @@ export default function AdminDashboard() {
           </nav>
         </aside>
         <main className="min-w-0">
-          {section === "posts"
-            ? view === "form" ? postForm : postList
-            : view === "form" ? resourceForm : resourceList}
+          {section === "messages"
+            ? messageList
+            : section === "posts"
+              ? view === "form" ? postForm : postList
+              : view === "form" ? resourceForm : resourceList}
         </main>
       </div>
     </div>

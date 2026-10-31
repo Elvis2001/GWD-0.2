@@ -374,6 +374,66 @@ export async function listTestimonials(): Promise<Testimonial[]> {
   }));
 }
 
+type DbContactMessage = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  subject: string;
+  message: string;
+  read_at: string | null;
+  created_at: string | null;
+};
+
+const CONTACT_COLUMNS = "id,name,email,phone,subject,message,read_at,created_at";
+
+function mapDbContactMessage(row: DbContactMessage): ContactMessage {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    subject: row.subject,
+    message: row.message,
+    readAt: row.read_at,
+    createdAt: row.created_at,
+  };
+}
+
+export async function listContactMessages(): Promise<ContactMessage[]> {
+  const result = await supabase
+    .from(CONTACT_TABLE)
+    .select(CONTACT_COLUMNS)
+    .order("created_at", { ascending: false });
+
+  const rows = await assertNoError(result, "Failed to fetch messages");
+  return (rows as DbContactMessage[]).map(mapDbContactMessage);
+}
+
+export async function setContactMessageRead(
+  id: string,
+  read: boolean,
+): Promise<ContactMessage | null> {
+  const result = await supabase
+    .from(CONTACT_TABLE)
+    .update({ read_at: read ? new Date().toISOString() : null })
+    .eq("id", id)
+    .select(CONTACT_COLUMNS)
+    .maybeSingle();
+
+  if (result.error) {
+    throw new Error(`Failed to update message: ${result.error.message}`);
+  }
+  return result.data ? mapDbContactMessage(result.data as DbContactMessage) : null;
+}
+
+export async function deleteContactMessage(id: string): Promise<void> {
+  const result = await supabase.from(CONTACT_TABLE).delete().eq("id", id);
+  if (result.error) {
+    throw new Error(`Failed to delete message: ${result.error.message}`);
+  }
+}
+
 export async function createContactMessage(input: InsertContactMessage): Promise<ContactMessage> {
   const result = await supabase
     .from(CONTACT_TABLE)

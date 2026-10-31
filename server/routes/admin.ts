@@ -7,7 +7,15 @@ import {
   uploadBufferToCloudinary,
   uploadPdfBufferToCloudinary,
 } from "../lib/cloudinary";
-import { createPost, deletePost, getAdminPostById, updatePost } from "../services/cms";
+import {
+  createPost,
+  deleteContactMessage,
+  deletePost,
+  getAdminPostById,
+  listContactMessages,
+  setContactMessageRead,
+  updatePost,
+} from "../services/cms";
 
 const adminRouter = Router();
 
@@ -316,6 +324,36 @@ adminRouter.post("/admin/resource", verifyAdmin, uploadPostAssets, async (req, r
     return res.status(201).json(created);
   } catch (error) {
     return next(error);
+  }
+});
+
+adminRouter.get("/admin/messages", verifyAdmin, async (_req, res, next) => {
+  try {
+    res.json(await listContactMessages());
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.patch("/admin/messages/:id", verifyAdmin, async (req, res, next) => {
+  try {
+    const { read } = z.object({ read: z.boolean() }).parse(req.body);
+    const updated = await setContactMessageRead(String(req.params.id), read);
+    if (!updated) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    return res.json(updated);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+adminRouter.delete("/admin/messages/:id", verifyAdmin, async (req, res, next) => {
+  try {
+    await deleteContactMessage(String(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    next(error);
   }
 });
 

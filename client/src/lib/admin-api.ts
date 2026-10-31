@@ -1,5 +1,6 @@
 import { buildApiUrl } from "./api";
 import { clearAdminToken, getAdminToken } from "./admin-auth";
+import type { ContactMessage } from "@shared/types";
 
 export type AdminPostSummary = {
   id: string | number;
@@ -236,6 +237,37 @@ export async function listAdminResources(): Promise<AdminPostSummary[]> {
     createdAt: (entry.createdAt as string) ?? null,
     contentType: "resource" as const,
   }));
+}
+
+const SESSION_EXPIRED = "Session expired or invalid. Please log in again.";
+
+export async function listAdminMessages(): Promise<ContactMessage[]> {
+  const res = await fetch(buildApiUrl("/api/admin/messages"), { headers: buildAuthHeaders() });
+  if (!res.ok) {
+    throw await parseApiError(res, "Failed to load messages", SESSION_EXPIRED);
+  }
+  return (await res.json()) as ContactMessage[];
+}
+
+export async function setAdminMessageRead(id: number, read: boolean): Promise<void> {
+  const res = await fetch(buildApiUrl(`/api/admin/messages/${id}`), {
+    method: "PATCH",
+    headers: { ...buildAuthHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ read }),
+  });
+  if (!res.ok) {
+    throw await parseApiError(res, "Failed to update message", SESSION_EXPIRED);
+  }
+}
+
+export async function deleteAdminMessage(id: number): Promise<void> {
+  const res = await fetch(buildApiUrl(`/api/admin/messages/${id}`), {
+    method: "DELETE",
+    headers: buildAuthHeaders(),
+  });
+  if (!res.ok) {
+    throw await parseApiError(res, "Failed to delete message", SESSION_EXPIRED);
+  }
 }
 
 export async function deleteAdminPost(id: string): Promise<void> {
