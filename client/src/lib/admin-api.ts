@@ -19,6 +19,7 @@ export type AdminPostDetails = AdminPostSummary & {
   name?: string;
   impactReport?: string;
   keyActivities?: string[];
+  programArea?: string;
   thumbnailImage?: string;
   coverImage?: string;
   galleryImages?: string[];
@@ -39,6 +40,7 @@ export type AdminPostPayload = {
   author?: string;
   impactReport?: string;
   keyActivities?: string[];
+  programArea?: string;
   thumbnail?: File | null;
   gallery?: File[];
   resourcePdf?: File | null;
@@ -74,6 +76,7 @@ function appendPostFormData(formData: FormData, payload: AdminPostPayload): void
   if (payload.keyActivities?.length) {
     formData.append("keyActivities", JSON.stringify(payload.keyActivities));
   }
+  if (payload.programArea !== undefined) formData.append("programArea", payload.programArea);
   formData.append("featured", String(Boolean(payload.featured)));
   formData.append("published", String(payload.published ?? true));
   if (payload.thumbnail) formData.append("thumbnail", payload.thumbnail);

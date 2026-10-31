@@ -25,6 +25,7 @@ const basePostSchema = z.object({
   imageUrl: z.string().url().optional(),
   impactReport: z.string().optional(),
   keyActivities: z.string().optional(),
+  programArea: z.enum(["financial-literacy", "digital-skills", "entrepreneurship", ""]).optional(),
 });
 
 const resourceUploadSchema = z.object({
@@ -108,6 +109,7 @@ adminRouter.post("/admin/post", verifyAdmin, uploadPostAssets, async (req, res, 
       imageUrl: parsed.imageUrl,
       impactReport: parsed.impactReport,
       keyActivities,
+      programArea: parsed.programArea || null,
       thumbnailUrl,
       galleryImages: galleryUrls,
       resourcePdfUrl,
@@ -172,6 +174,7 @@ adminRouter.put("/admin/post/:id", verifyAdmin, uploadPostAssets, async (req, re
       impactReport: parsed.impactReport,
       keyActivities:
         parsed.keyActivities === undefined ? undefined : parseStringArray(parsed.keyActivities),
+      programArea: parsed.programArea === undefined ? undefined : parsed.programArea || null,
       thumbnailUrl,
       galleryImages: galleryUrls.length > 0 ? galleryUrls : undefined,
       resourcePdfUrl,
@@ -264,6 +267,7 @@ adminRouter.post("/admin/program", verifyAdmin, uploadPostAssets, async (req, re
       imageUrl: parsed.imageUrl,
       impactReport: parsed.impactReport,
       keyActivities: parseStringArray(parsed.keyActivities),
+      programArea: parsed.programArea || null,
       thumbnailUrl,
       galleryImages: galleryUrls,
       resourcePdfUrl,

@@ -20,6 +20,7 @@ export interface Post {
   resourcePdfName?: string;
   keyActivities?: string[];
   contentType?: "post" | "program" | "gallery" | "resource";
+  programArea?: string;
   createdAt: Date | string | null;
   updatedAt?: Date | string | null;
 }

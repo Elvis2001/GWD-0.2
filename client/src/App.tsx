@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,8 +20,9 @@ function ScrollToTop() {
 // Pages
 import Home from "@/pages/Home";
 import About from "@/pages/About";
-import ProgramFLiC from "@/pages/ProgramFLiC";
-import ProgramHUBs from "@/pages/ProgramHUBs";
+import ProgramFinancialLiteracy from "@/pages/ProgramFinancialLiteracy";
+import ProgramArea from "@/pages/ProgramArea";
+import ProgramFutureFounders from "@/pages/ProgramFutureFounders";
 import ProgramAI from "@/pages/ProgramAI";
 import Gallery from "@/pages/Gallery";
 import Blog from "@/pages/Blog";
@@ -43,8 +44,12 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/about" component={About} />
-          <Route path="/programs/flic" component={ProgramFLiC} />
-          <Route path="/programs/hubs" component={ProgramHUBs} />
+          <Route path="/programs/financial-literacy" component={ProgramFinancialLiteracy} />
+          <Route path="/programs/digital-skills">{() => <ProgramArea area="digital-skills" />}</Route>
+          <Route path="/programs/entrepreneurship">{() => <ProgramArea area="entrepreneurship" />}</Route>
+          <Route path="/programs/future-founders" component={ProgramFutureFounders} />
+          <Route path="/programs/flic"><Redirect to="/programs/financial-literacy" replace /></Route>
+          <Route path="/programs/hubs"><Redirect to="/programs/financial-literacy#hubs" replace /></Route>
           <Route path="/programs/ai" component={ProgramAI} />
           <Route path="/gallery" component={Gallery} />
           <Route path="/blog" component={Blog} />

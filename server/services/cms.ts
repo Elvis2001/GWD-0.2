@@ -35,6 +35,7 @@ type DbPost = {
   resource_pdf_name: string | null;
   key_activities: string[] | null;
   content_type: string | null;
+  program_area: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -58,6 +59,7 @@ type UpsertInput = {
   resourcePdfName?: string | null;
   keyActivities?: string[];
   contentType?: "post" | "program" | "gallery" | "resource";
+  programArea?: string | null;
 };
 
 function mapDbPost(row: DbPost): CmsPost {
@@ -88,6 +90,7 @@ function mapDbPost(row: DbPost): CmsPost {
     resourcePdfName: row.resource_pdf_name ?? undefined,
     keyActivities: row.key_activities ?? [],
     contentType: (row.content_type as CmsPost["contentType"]) ?? "post",
+    programArea: row.program_area ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -117,7 +120,7 @@ export async function listPublishedPosts(): Promise<CmsPost[]> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("published", true)
     .in("content_type", ["post", "program"])
@@ -131,7 +134,7 @@ export async function getPostBySlug(slug: string): Promise<CmsPost | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("slug", slug)
     .eq("published", true)
@@ -150,7 +153,7 @@ export async function listGalleryByCategory(category: string): Promise<CmsPost[]
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("published", true)
     .eq("category", category.toLowerCase())
@@ -166,7 +169,7 @@ export async function listProgramsByCategory(category: string): Promise<CmsProgr
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("published", true)
     .eq("category", category.toLowerCase())
@@ -181,7 +184,7 @@ export async function listResources(): Promise<CmsPost[]> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("published", true)
     .eq("content_type", "resource")
@@ -195,7 +198,7 @@ export async function getProgramById(id: string): Promise<CmsProgram | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("id", id)
     .eq("content_type", "program")
@@ -214,7 +217,7 @@ export async function getPostById(id: string): Promise<CmsPost | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("id", id)
     .eq("published", true)
@@ -233,7 +236,7 @@ export async function getAdminPostById(id: string): Promise<CmsPost | null> {
   const result = await supabase
     .from(POSTS_TABLE)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -268,13 +271,14 @@ export async function createPost(input: UpsertInput): Promise<CmsPost> {
     resource_pdf_name: input.resourcePdfName ?? null,
     key_activities: input.keyActivities ?? [],
     content_type: input.contentType ?? "post",
+    program_area: input.programArea ?? null,
   };
 
   const result = await supabase
     .from(POSTS_TABLE)
     .insert(payload)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .single();
 
@@ -305,13 +309,14 @@ export async function updatePost(
   if (input.resourcePdfName !== undefined) payload.resource_pdf_name = input.resourcePdfName;
   if (input.keyActivities !== undefined) payload.key_activities = input.keyActivities;
   if (input.contentType !== undefined) payload.content_type = input.contentType;
+  if (input.programArea !== undefined) payload.program_area = input.programArea;
 
   const result = await supabase
     .from(POSTS_TABLE)
     .update(payload)
     .eq("id", id)
     .select(
-      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,created_at,updated_at",
+      "id,title,slug,category,excerpt,content,thumbnail_url,gallery_images,featured,published,author,name,role,image_url,impact_report,resource_pdf_url,resource_pdf_name,key_activities,content_type,program_area,created_at,updated_at",
     )
     .maybeSingle();
 

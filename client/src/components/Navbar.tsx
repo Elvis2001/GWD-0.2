@@ -7,9 +7,10 @@ import { useTheme } from "@/hooks/use-theme";
 
 // Programs submenu items
 const programs = [
-  { title: "Financial Literacy Clubs (FLiC)", href: "/programs/flic" },
-  { title: "HUBs (Higher Institutions)", href: "/programs/hubs" },
-  { title: "Resources(DFL)", href: "/programs/ai" },
+  { title: "Financial Literacy", href: "/programs/financial-literacy" },
+  { title: "Digital Skills and Inclusion", href: "/programs/digital-skills" },
+  { title: "Entrepreneurship & Employability", href: "/programs/entrepreneurship" },
+  { title: "Future Founder's Acceleration and Innovation", href: "/programs/future-founders" },
 ];
 
 export function Navbar() {

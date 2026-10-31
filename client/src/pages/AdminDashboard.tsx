@@ -35,6 +35,7 @@ import {
 } from "@/lib/admin-api";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
+import { PROGRAM_AREAS } from "@/lib/program-areas";
 
 type ProgramCategory = "flic" | "hubs" | "activities" | "blog";
 type AdminTab = ProgramCategory | "resources";
@@ -47,6 +48,7 @@ type FormState = {
   author: string;
   impactReport: string;
   keyActivities: string;
+  programArea: string;
   thumbnail: File | null;
   gallery: File[];
   resourcePdf: File | null;
@@ -64,6 +66,7 @@ const emptyForm: FormState = {
   author: "",
   impactReport: "",
   keyActivities: "",
+  programArea: "",
   thumbnail: null,
   gallery: [],
   resourcePdf: null,
@@ -72,6 +75,12 @@ const emptyForm: FormState = {
   resourceColor: "bg-purple-50 text-purple-600",
   resourcePoints: "",
 };
+
+// New FLiC posts belong on the Financial Literacy page unless changed.
+const formForTab = (tab: AdminTab): FormState => ({
+  ...emptyForm,
+  programArea: tab === "flic" ? "financial-literacy" : "",
+});
 
 type FieldCopy = {
   title: string;
@@ -111,7 +120,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<AdminTab>("flic");
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [form, setForm] = useState<FormState>(formForTab("flic"));
   const [submitting, setSubmitting] = useState(false);
   const [posts, setPosts] = useState<AdminPostSummary[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -226,13 +235,13 @@ export default function AdminDashboard() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as AdminTab);
-    setForm(emptyForm);
+    setForm(formForTab(tab as AdminTab));
     setEditingId(null);
   };
 
   const resetEditor = () => {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm(formForTab(activeTab));
   };
 
   const loadPosts = async () => {
@@ -282,6 +291,7 @@ export default function AdminDashboard() {
         author: post.author ?? "",
         impactReport: post.impactReport ?? "",
         keyActivities: post.keyActivities?.join(", ") ?? "",
+        programArea: post.programArea ?? "",
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
@@ -348,6 +358,7 @@ export default function AdminDashboard() {
           .split(",")
           .map((value) => value.trim())
           .filter(Boolean),
+        programArea: form.programArea,
         thumbnail: form.thumbnail,
         gallery: form.gallery,
         resourcePdf: form.resourcePdf,
@@ -377,7 +388,7 @@ export default function AdminDashboard() {
         title: "Published",
         description: `${config[activeTab as ProgramCategory].title} content published successfully.`,
       });
-      setForm(emptyForm);
+      setForm(formForTab(activeTab));
       await loadPosts();
       await queryClient.invalidateQueries();
     } catch (error) {
@@ -530,6 +541,21 @@ export default function AdminDashboard() {
                       value={form.author}
                       onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
                     />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold" htmlFor={`${category}-program-area`}>Program Area</label>
+                      <select
+                        id={`${category}-program-area`}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        value={form.programArea}
+                        onChange={(e) => setForm((prev) => ({ ...prev, programArea: e.target.value }))}
+                      >
+                        <option value="">None (Gallery or Blog only)</option>
+                        {PROGRAM_AREAS.map((area) => (
+                          <option key={area.value} value={area.value}>{area.title}</option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500">Choose which Our Programs page shows this post.</p>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">{sectionLabel[category]} Impact Report</label>

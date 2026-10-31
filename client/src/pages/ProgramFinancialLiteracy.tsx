@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/SectionHeader";
 import { Link } from "wouter";
-import { useProgramsByCategory } from "@/hooks/use-content";
+import { useEffect } from "react";
+import { ProgramPostCard } from "@/components/ProgramPostCard";
+import { usePosts, useProgramsByCategory } from "@/hooks/use-content";
 import { 
   Check, 
   ArrowRight, 
@@ -20,10 +22,11 @@ import {
   Clock,
   Trophy,
   Calendar,
-  Target as TargetIcon
+  Target as TargetIcon,
+  Zap
 } from "lucide-react";
 
-export default function ProgramFLiC() {
+export default function ProgramFinancialLiteracy() {
   const curriculum = [
     {
       title: "Value of Education",
@@ -77,6 +80,7 @@ export default function ProgramFLiC() {
 
   const { data: flicPrograms } = useProgramsByCategory("flic");
   const activeSchools = (flicPrograms ?? []).map((program) => ({
+    id: program.id,
     title: program.title,
     name: program.name,
     location: program.excerpt || "FLIC Program",
@@ -84,6 +88,24 @@ export default function ProgramFLiC() {
     description: program.content || "Program details",
     createdAt: program.createdAt,
   }));
+
+  const { data: posts } = usePosts();
+  const otherPosts = (posts ?? []).filter(
+    (post) => post.programArea === "financial-literacy" && post.category !== "flic"
+  );
+
+  // The old /programs/hubs link lands here; wait for posts so the section stays in view.
+  useEffect(() => {
+    if (window.location.hash !== "#hubs") return;
+    const timer = setTimeout(() => document.getElementById("hubs")?.scrollIntoView(), 100);
+    return () => clearTimeout(timer);
+  }, [posts, flicPrograms]);
+
+  const hubFeatures = [
+    { title: "Collaborative Workspace", desc: "Modern hubs equipped with fast internet and collaborative tools.", icon: <Users className="w-6 h-6" /> },
+    { title: "Mentorship Programs", desc: "Direct access to industry professionals and successful founders.", icon: <Zap className="w-6 h-6" /> },
+    { title: "Incubation Support", desc: "Turning student projects into viable business startups.", icon: <TrendingUp className="w-6 h-6" /> }
+  ];
 
   const howItWorks = [
     {
@@ -400,11 +422,11 @@ export default function ProgramFLiC() {
                       {school.name}
                     </p>
                   )}
-                  <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                  <p className="text-gray-500 text-sm mb-6 leading-relaxed line-clamp-4">
                     {school.description}
                   </p>
                   <Link
-                    href="/gallery/flic"
+                    href={`/details/flic/${school.id}`}
                     className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:gap-3 transition-all"
                   >
                     View Details <ExternalLink className="w-4 h-4" />
@@ -417,6 +439,40 @@ export default function ProgramFLiC() {
                 No FLIC success stories have been published yet.
               </p>
             )}
+          </div>
+        </section>
+
+        {otherPosts.length > 0 && (
+          <section className="mb-32">
+            <SectionHeader
+              title="Beyond the Clubs"
+              subtitle="More Financial Literacy Work"
+              description="Campaigns, outreach and events that bring money skills to young people and communities."
+            />
+            <div className="grid md:grid-cols-3 gap-8">
+              {otherPosts.map((post, i) => (
+                <ProgramPostCard key={post.id} post={post} index={i} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section id="hubs" className="mb-32 scroll-mt-28">
+          <SectionHeader
+            title="HUBs Initiative"
+            subtitle="Coming Soon"
+            description="Establishing innovation hubs in higher institutions across Adamawa State to foster a culture of entrepreneurship and digital excellence."
+          />
+          <div className="grid md:grid-cols-3 gap-8">
+            {hubFeatures.map((feature) => (
+              <div key={feature.title} className="bg-white p-8 rounded-3xl shadow-md border border-gray-50">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+                  {feature.icon}
+                </div>
+                <h3 className="font-bold mb-2">{feature.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
           </div>
         </section>
 
