@@ -1,21 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
-import {
-  GraduationCap,
-  School,
-  Newspaper,
-  Gamepad2,
-  LogOut,
-  Save,
-  LayoutDashboard,
-  Trash2,
-  FileText,
-  Edit3,
-  XCircle,
-} from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Edit3, FileText, LogOut, Newspaper, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -36,6 +21,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { PROGRAM_AREAS } from "@/lib/program-areas";
+import { cn } from "@/lib/utils";
 
 type ProgramCategory = "flic" | "hubs" | "activities" | "blog";
 type AdminTab = ProgramCategory | "resources";
@@ -95,12 +81,17 @@ type FieldCopy = {
   resourcePdfLabel: string;
 };
 
-const sectionLabel: Record<ProgramCategory, string> = {
-  flic: "FLIC",
-  hubs: "HUBS",
-  activities: "ACTIVITIES",
-  blog: "BLOG",
+const POST_TYPES: ProgramCategory[] = ["flic", "hubs", "activities", "blog"];
+
+const typeLabel: Record<string, string> = {
+  flic: "FLiC",
+  hubs: "HUBs",
+  activities: "Activity",
+  blog: "Blog",
 };
+
+const programLabel = (value?: string): string =>
+  PROGRAM_AREAS.find((area) => area.value === value)?.title ?? "None";
 
 const resourceIconOptions = [
   { value: "terminal", label: "Terminal" },
@@ -127,6 +118,11 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loadingEditId, setLoadingEditId] = useState<string | null>(null);
+  const [section, setSection] = useState<"posts" | "resources">("posts");
+  const [view, setView] = useState<"list" | "form">("list");
+  const [search, setSearch] = useState("");
+  const [programFilter, setProgramFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     const validateToken = async () => {
@@ -233,15 +229,29 @@ export default function AdminDashboard() {
     toast({ title: "Logged Out", description: "Session ended." });
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as AdminTab);
-    setForm(formForTab(tab as AdminTab));
+  const openSection = (next: "posts" | "resources") => {
+    setSection(next);
+    setView("list");
     setEditingId(null);
+  };
+
+  const openNew = (tab: AdminTab) => {
+    setActiveTab(tab);
+    setForm(formForTab(tab));
+    setEditingId(null);
+    setView("form");
+    window.scrollTo({ top: 0 });
+  };
+
+  const handleTypeChange = (type: ProgramCategory) => {
+    setActiveTab(type);
+    setForm((prev) => ({ ...prev, programArea: formForTab(type).programArea }));
   };
 
   const resetEditor = () => {
     setEditingId(null);
     setForm(formForTab(activeTab));
+    setView("list");
   };
 
   const loadPosts = async () => {
@@ -282,6 +292,7 @@ export default function AdminDashboard() {
 
       setActiveTab(category);
       setEditingId(postId);
+      setView("form");
       setForm({
         ...emptyForm,
         title: post.title ?? "",
@@ -341,6 +352,7 @@ export default function AdminDashboard() {
           description: "Resource PDF published successfully.",
         });
         setForm(emptyForm);
+        setView("list");
         await loadPosts();
         await queryClient.invalidateQueries();
         return;
@@ -388,7 +400,7 @@ export default function AdminDashboard() {
         title: "Published",
         description: `${config[activeTab as ProgramCategory].title} content published successfully.`,
       });
-      setForm(formForTab(activeTab));
+      resetEditor();
       await loadPosts();
       await queryClient.invalidateQueries();
     } catch (error) {
@@ -424,21 +436,27 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredPosts = useMemo(
-    () => {
-      const pool =
-        activeTab === "resources"
-          ? posts.filter((post) => post.contentType === "resource")
-          : posts.filter((post) => post.category.toLowerCase() === activeTab);
-
-      return pool.sort((a, b) => {
+  const sortedPosts = useMemo(
+    () =>
+      [...posts].sort((a, b) => {
         const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return bTime - aTime;
-      });
-    },
-    [activeTab, posts],
+      }),
+    [posts],
   );
+  const allPosts = sortedPosts.filter((post) => post.contentType !== "resource");
+  const resources = sortedPosts.filter((post) => post.contentType === "resource");
+
+  const visiblePosts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return allPosts.filter((post) => {
+      if (query && !post.title.toLowerCase().includes(query)) return false;
+      if (typeFilter !== "all" && post.category.toLowerCase() !== typeFilter) return false;
+      if (programFilter === "none") return !post.programArea;
+      return programFilter === "all" || post.programArea === programFilter;
+    });
+  }, [allPosts, search, typeFilter, programFilter]);
 
   const formatDate = (value: string | null): string => {
     if (!value) return "Unknown date";
@@ -447,378 +465,459 @@ export default function AdminDashboard() {
     return parsed.toLocaleDateString();
   };
 
-  return (
-    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
-      <div className="container-custom">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight flex items-center gap-4">
-              <LayoutDashboard className="w-10 h-10 text-primary" /> Admin Console
-            </h1>
-            <p className="text-gray-500 mt-2 font-medium">Hello there admin</p>
+  const labelClass = "text-sm font-medium";
+  const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+  const category = activeTab as ProgramCategory;
+
+  const navItems = [
+    { key: "posts" as const, label: "Posts", icon: <Newspaper className="w-4 h-4" /> },
+    { key: "resources" as const, label: "Resources", icon: <FileText className="w-4 h-4" /> },
+  ];
+
+  const stats = [
+    { label: "All posts", value: allPosts.length },
+    ...PROGRAM_AREAS.map((area) => ({
+      label: area.title,
+      value: allPosts.filter((post) => post.programArea === area.value).length,
+    })),
+  ];
+
+  const backButton = (
+    <button
+      type="button"
+      onClick={resetEditor}
+      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+    >
+      <ArrowLeft className="w-4 h-4" /> Back to {section === "posts" ? "posts" : "resources"}
+    </button>
+  );
+
+  const fileField = (label: string, input: JSX.Element) => (
+    <div className="space-y-2">
+      <label className={labelClass}>{label}</label>
+      {input}
+    </div>
+  );
+
+  const postForm = (
+    <div>
+      {backButton}
+      <h2 className="text-2xl font-bold mb-1">{editingId ? "Edit post" : "New post"}</h2>
+      <p className="text-sm text-muted-foreground mb-6">
+        {editingId
+          ? "Upload new files only when you want to replace media."
+          : "Choose the post type first. It sets where the post appears in the Gallery and Blog."}
+      </p>
+      <div className="bg-card border border-border rounded-xl p-6 space-y-5 max-w-3xl">
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className={labelClass} htmlFor="post-type">Post type</label>
+            <select
+              id="post-type"
+              className={selectClass}
+              value={category}
+              disabled={Boolean(editingId)}
+              onChange={(e) => handleTypeChange(e.target.value as ProgramCategory)}
+            >
+              {POST_TYPES.map((type) => (
+                <option key={type} value={type}>{config[type].title}</option>
+              ))}
+            </select>
           </div>
-          <Button variant="ghost" onClick={handleLogout} className="rounded-full hover:text-red-500">
-            <LogOut className="w-5 h-5 mr-2" /> Logout
+          <div className="space-y-2">
+            <label className={labelClass} htmlFor="program-area">Program area</label>
+            <select
+              id="program-area"
+              className={selectClass}
+              value={form.programArea}
+              onChange={(e) => setForm((prev) => ({ ...prev, programArea: e.target.value }))}
+            >
+              <option value="">None (Gallery or Blog only)</option>
+              {PROGRAM_AREAS.map((area) => (
+                <option key={area.value} value={area.value}>{area.title}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Title</label>
+          <Input
+            placeholder={fieldCopy[category].title}
+            value={form.title}
+            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+          />
+        </div>
+        {(category === "flic" || category === "hubs") && (
+          <div className="space-y-2">
+            <label className={labelClass}>{category === "flic" ? "School name" : "Hub name"}</label>
+            <Input
+              placeholder={fieldCopy[category].name}
+              value={form.name}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            />
+          </div>
+        )}
+        <div className="space-y-2">
+          <label className={labelClass}>Excerpt</label>
+          <Input
+            placeholder={fieldCopy[category].excerpt}
+            value={form.excerpt}
+            onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Content</label>
+          <Textarea
+            placeholder={fieldCopy[category].content}
+            value={form.content}
+            onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+            className="h-40"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Author</label>
+          <Input
+            placeholder={fieldCopy[category].author}
+            value={form.author}
+            onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Impact report</label>
+          <Textarea
+            rows={4}
+            placeholder={fieldCopy[category].impactReport}
+            value={form.impactReport}
+            onChange={(e) => setForm((prev) => ({ ...prev, impactReport: e.target.value }))}
+          />
+          <p className="text-xs text-muted-foreground">One point per line. Each line shows as a bullet on the post.</p>
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Key activities</label>
+          <Input
+            placeholder={fieldCopy[category].keyActivities}
+            value={form.keyActivities}
+            onChange={(e) => setForm((prev) => ({ ...prev, keyActivities: e.target.value }))}
+          />
+        </div>
+        {fileField(
+          fieldCopy[category].thumbnailLabel,
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setForm((prev) => ({ ...prev, thumbnail: e.target.files?.[0] ?? null }))}
+          />,
+        )}
+        {fileField(
+          fieldCopy[category].galleryLabel,
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setForm((prev) => ({ ...prev, gallery: Array.from(e.target.files ?? []) }))}
+          />,
+        )}
+        {fileField(
+          fieldCopy[category].resourcePdfLabel,
+          <Input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setForm((prev) => ({ ...prev, resourcePdf: e.target.files?.[0] ?? null }))}
+          />,
+        )}
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={resetEditor} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            <Save className="w-4 h-4 mr-2" />
+            {submitting ? (editingId ? "Saving..." : "Publishing...") : editingId ? "Save changes" : "Publish"}
           </Button>
         </div>
+      </div>
+    </div>
+  );
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="bg-white p-1 rounded-2xl shadow-sm border border-gray-100 mb-12 flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="flic" className="rounded-xl px-6 py-3 font-bold">
-              <GraduationCap className="w-4 h-4 mr-2" /> FLIC
-            </TabsTrigger>
-            <TabsTrigger value="hubs" className="rounded-xl px-6 py-3 font-bold">
-              <School className="w-4 h-4 mr-2" /> Hubs
-            </TabsTrigger>
-            <TabsTrigger value="activities" className="rounded-xl px-6 py-3 font-bold">
-              <Gamepad2 className="w-4 h-4 mr-2" /> Financial Literacy Activities
-            </TabsTrigger>
-            <TabsTrigger value="blog" className="rounded-xl px-6 py-3 font-bold">
-              <Newspaper className="w-4 h-4 mr-2" /> Blogs & News
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="rounded-xl px-6 py-3 font-bold">
-              <FileText className="w-4 h-4 mr-2" /> Resource PDFs
-            </TabsTrigger>
-          </TabsList>
+  const resourceForm = (
+    <div>
+      {backButton}
+      <h2 className="text-2xl font-bold mb-1">New resource</h2>
+      <p className="text-sm text-muted-foreground mb-6">{config.resources.description}</p>
+      <div className="bg-card border border-border rounded-xl p-6 space-y-5 max-w-3xl">
+        <div className="space-y-2">
+          <label className={labelClass}>Title</label>
+          <Input
+            placeholder="e.g. Prompt Engineering Mastery"
+            value={form.title}
+            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Description</label>
+          <Textarea
+            placeholder="Short explanation of what this resource teaches."
+            value={form.resourceDescription}
+            onChange={(e) => setForm((prev) => ({ ...prev, resourceDescription: e.target.value }))}
+            className="h-32"
+          />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className={labelClass}>Icon</label>
+            <select
+              className={selectClass}
+              value={form.resourceIcon}
+              onChange={(e) => setForm((prev) => ({ ...prev, resourceIcon: e.target.value }))}
+            >
+              {resourceIconOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className={labelClass}>Color theme</label>
+            <select
+              className={selectClass}
+              value={form.resourceColor}
+              onChange={(e) => setForm((prev) => ({ ...prev, resourceColor: e.target.value }))}
+            >
+              {resourceColorOptions.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className={labelClass}>Points (comma-separated)</label>
+          <Input
+            placeholder="Structured Prompting Frameworks, Iterative Refinement Techniques"
+            value={form.resourcePoints}
+            onChange={(e) => setForm((prev) => ({ ...prev, resourcePoints: e.target.value }))}
+          />
+        </div>
+        {fileField(
+          "PDF file",
+          <Input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setForm((prev) => ({ ...prev, resourcePdf: e.target.files?.[0] ?? null }))}
+          />,
+        )}
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={resetEditor} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            <Save className="w-4 h-4 mr-2" />
+            {submitting ? "Publishing..." : "Publish resource"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 
-          {(["flic", "hubs", "activities", "blog"] as ProgramCategory[]).map((category) => (
-            <TabsContent key={category} value={category}>
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <Card className="border-none shadow-xl bg-white rounded-[2rem]">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-black">
-                      {editingId && activeTab === category ? "Edit" : "Create"}{" "}
-                      {config[category].title}
-                    </CardTitle>
-                    <CardDescription>
-                      {editingId && activeTab === category
-                        ? "Update the existing content. Upload new files only when you want to replace media."
-                        : config[category].description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Title</label>
-                    <Input
-                      placeholder={fieldCopy[category].title}
-                      value={form.title}
-                      onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                    />
-                    </div>
-                    {(category === "flic" || category === "hubs") && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold">
-                          {category === "flic" ? "School Name" : "Hub Name"}
-                        </label>
-                        <Input
-                          placeholder={fieldCopy[category].name}
-                          value={form.name}
-                          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                        />
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Excerpt</label>
-                    <Input
-                      placeholder={fieldCopy[category].excerpt}
-                      value={form.excerpt}
-                      onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
-                    />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Content</label>
-                    <Textarea
-                      placeholder={fieldCopy[category].content}
-                      value={form.content}
-                      onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-                      className="h-40"
-                    />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Author</label>
-                    <Input
-                      placeholder={fieldCopy[category].author}
-                      value={form.author}
-                      onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
-                    />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold" htmlFor={`${category}-program-area`}>Program Area</label>
-                      <select
-                        id={`${category}-program-area`}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={form.programArea}
-                        onChange={(e) => setForm((prev) => ({ ...prev, programArea: e.target.value }))}
-                      >
-                        <option value="">None (Gallery or Blog only)</option>
-                        {PROGRAM_AREAS.map((area) => (
-                          <option key={area.value} value={area.value}>{area.title}</option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500">Choose which Our Programs page shows this post.</p>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Impact Report</label>
-                    <Textarea
-                      rows={4}
-                      placeholder={fieldCopy[category].impactReport}
-                      value={form.impactReport}
-                      onChange={(e) => setForm((prev) => ({ ...prev, impactReport: e.target.value }))}
-                    />
-                    <p className="text-xs text-gray-500">One point per line. Each line shows as a bullet on the post.</p>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{sectionLabel[category]} Key Activities</label>
-                    <Input
-                      placeholder={fieldCopy[category].keyActivities}
-                      value={form.keyActivities}
-                      onChange={(e) => setForm((prev) => ({ ...prev, keyActivities: e.target.value }))}
-                    />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{fieldCopy[category].thumbnailLabel}</label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, thumbnail: e.target.files?.[0] ?? null }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{fieldCopy[category].galleryLabel}</label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            gallery: Array.from(e.target.files ?? []),
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">{fieldCopy[category].resourcePdfLabel}</label>
-                      <Input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, resourcePdf: e.target.files?.[0] ?? null }))
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {editingId && activeTab === category && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={resetEditor}
-                          disabled={submitting}
-                          className="sm:w-auto"
-                        >
-                          <XCircle className="w-4 h-4 mr-2" />
-                          Cancel
-                        </Button>
-                      )}
-                      <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
-                        <Save className="w-4 h-4 mr-2" />
-                        {submitting
-                          ? editingId
-                            ? "Saving..."
-                            : "Publishing..."
-                          : editingId
-                            ? "Save Changes"
-                            : "Publish"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+  const deleteButton = (post: AdminPostSummary) => (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={`Delete ${post.title}`}
+      title="Delete"
+      className="text-muted-foreground hover:text-red-600"
+      onClick={() => handleDeletePost(post.id, post.title)}
+      disabled={deletingId === String(post.id)}
+    >
+      <Trash2 className="w-4 h-4" />
+    </Button>
+  );
 
-                <Card className="border-none shadow-xl bg-white rounded-[2rem] mt-8">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-black">
-                      Manage {config[category].title} Posts
-                    </CardTitle>
-                    <CardDescription>Edit or delete previously published items for this section.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {loadingPosts && (
-                      <div className="flex justify-center py-6">
-                        <Spinner size="sm" />
-                      </div>
-                    )}
-                    {!loadingPosts && filteredPosts.length === 0 && (
-                      <p className="text-sm text-gray-500">No published items yet.</p>
-                    )}
-                    {!loadingPosts &&
-                      filteredPosts.map((post) => (
-                        <div
-                          key={String(post.id)}
-                          className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl border border-gray-100"
-                        >
-                          <div>
-                            <p className="font-semibold text-gray-900">{post.title}</p>
-                            <p className="text-xs text-gray-500">
-                              {post.category.toUpperCase()} - {formatDate(post.createdAt)}
-                            </p>
-                          </div>
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => handleStartEdit(post.id)}
-                              disabled={loadingEditId === String(post.id) || Boolean(deletingId)}
-                            >
-                              <Edit3 className="w-4 h-4 mr-2" />
-                              {loadingEditId === String(post.id) ? "Loading..." : "Edit"}
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              onClick={() => handleDeletePost(post.id, post.title)}
-                              disabled={deletingId === String(post.id)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              {deletingId === String(post.id) ? "Deleting..." : "Delete"}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </TabsContent>
+  const loadingRow = (
+    <div className="flex justify-center py-10">
+      <Spinner size="sm" />
+    </div>
+  );
+
+  const postList = (
+    <div>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold">Posts</h2>
+        <Button onClick={() => openNew("flic")}>
+          <Plus className="w-4 h-4 mr-2" /> New post
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        {stats.map((stat) => (
+          <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
+            <p className="text-xs text-muted-foreground">{stat.label}</p>
+            <p className="text-2xl font-bold mt-1">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col md:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            aria-label="Search posts"
+            placeholder="Search posts"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <select
+          aria-label="Filter by program"
+          className={`${selectClass} md:w-56`}
+          value={programFilter}
+          onChange={(e) => setProgramFilter(e.target.value)}
+        >
+          <option value="all">All programs</option>
+          {PROGRAM_AREAS.map((area) => (
+            <option key={area.value} value={area.value}>{area.title}</option>
           ))}
+          <option value="none">No program</option>
+        </select>
+        <select
+          aria-label="Filter by type"
+          className={`${selectClass} md:w-44`}
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+        >
+          <option value="all">All types</option>
+          {POST_TYPES.map((type) => (
+            <option key={type} value={type}>{typeLabel[type]}</option>
+          ))}
+        </select>
+      </div>
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        {loadingPosts ? (
+          loadingRow
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="border-b border-border text-xs text-muted-foreground">
+              <tr>
+                <th className="text-left font-medium px-4 py-3">Title</th>
+                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Program</th>
+                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Type</th>
+                <th className="text-left font-medium px-4 py-3 hidden lg:table-cell">Date</th>
+                <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visiblePosts.map((post) => (
+                <tr key={String(post.id)} className="border-b border-border last:border-0 hover:bg-muted/50">
+                  <td className="px-4 py-3">
+                    <p className="font-medium line-clamp-2">{post.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 md:hidden">
+                      {programLabel(post.programArea)} · {typeLabel[post.category.toLowerCase()] ?? post.category}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{programLabel(post.programArea)}</td>
+                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                    {typeLabel[post.category.toLowerCase()] ?? post.category}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap hidden lg:table-cell">{formatDate(post.createdAt)}</td>
+                  <td className="px-2 py-2">
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Edit ${post.title}`}
+                        title="Edit"
+                        className="text-muted-foreground"
+                        onClick={() => handleStartEdit(post.id)}
+                        disabled={loadingEditId === String(post.id) || Boolean(deletingId)}
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                      {deleteButton(post)}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {visiblePosts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                    No posts match your search.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+      {!loadingPosts && (
+        <p className="text-xs text-muted-foreground mt-3">
+          Showing {visiblePosts.length} of {allPosts.length} posts
+        </p>
+      )}
+    </div>
+  );
 
-          <TabsContent value="resources">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="border-none shadow-xl bg-white rounded-[2rem]">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-black">{config.resources.title}</CardTitle>
-                  <CardDescription>{config.resources.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Resource Title</label>
-                    <Input
-                      placeholder="e.g. Prompt Engineering Mastery"
-                      value={form.title}
-                      onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Description</label>
-                    <Textarea
-                      placeholder="Short explanation of what this resource teaches."
-                      value={form.resourceDescription}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, resourceDescription: e.target.value }))
-                      }
-                      className="h-32"
-                    />
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">Icon</label>
-                      <select
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={form.resourceIcon}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, resourceIcon: e.target.value }))
-                        }
-                      >
-                        {resourceIconOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">Color Theme</label>
-                      <select
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={form.resourceColor}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, resourceColor: e.target.value }))
-                        }
-                      >
-                        {resourceColorOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Points (comma-separated)</label>
-                    <Input
-                      placeholder="Structured Prompting Frameworks, Iterative Refinement Techniques"
-                      value={form.resourcePoints}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, resourcePoints: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">PDF File</label>
-                    <Input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, resourcePdf: e.target.files?.[0] ?? null }))
-                      }
-                    />
-                  </div>
-                  <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-                    <Save className="w-4 h-4 mr-2" />
-                    {submitting ? "Publishing..." : "Publish Resource"}
-                  </Button>
-                </CardContent>
-              </Card>
+  const resourceList = (
+    <div>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold">Resources</h2>
+        <Button onClick={() => openNew("resources")}>
+          <Plus className="w-4 h-4 mr-2" /> New resource
+        </Button>
+      </div>
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        {loadingPosts && loadingRow}
+        {!loadingPosts && resources.length === 0 && (
+          <p className="px-4 py-10 text-sm text-center text-muted-foreground">No resource PDFs published yet.</p>
+        )}
+        {!loadingPosts &&
+          resources.map((post) => (
+            <div
+              key={String(post.id)}
+              className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-0"
+            >
+              <div>
+                <p className="text-sm font-medium">{post.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatDate(post.createdAt)}</p>
+              </div>
+              {deleteButton(post)}
+            </div>
+          ))}
+      </div>
+    </div>
+  );
 
-              <Card className="border-none shadow-xl bg-white rounded-[2rem] mt-8">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-black">Manage Resource PDFs</CardTitle>
-                  <CardDescription>Delete previously published resource entries.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {loadingPosts && (
-                    <div className="flex justify-center py-6">
-                      <Spinner size="sm" />
-                    </div>
-                  )}
-                  {!loadingPosts && filteredPosts.length === 0 && (
-                    <p className="text-sm text-gray-500">No resource PDFs published yet.</p>
-                  )}
-                  {!loadingPosts &&
-                    filteredPosts.map((post) => (
-                      <div
-                        key={String(post.id)}
-                        className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl border border-gray-100"
-                      >
-                        <div>
-                          <p className="font-semibold text-gray-900">{post.title}</p>
-                          <p className="text-xs text-gray-500">
-                            RESOURCE • {formatDate(post.createdAt)}
-                          </p>
-                        </div>
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleDeletePost(post.id, post.title)}
-                          disabled={deletingId === String(post.id)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          {deletingId === String(post.id) ? "Deleting..." : "Delete"}
-                        </Button>
-                      </div>
-                    ))}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </TabsContent>
-        </Tabs>
+  return (
+    <div className="pt-28 pb-16 bg-background text-foreground min-h-screen">
+      <div className="container-custom grid lg:grid-cols-[200px_minmax(0,1fr)] gap-8">
+        <aside className="lg:sticky lg:top-28 lg:self-start">
+          <p className="font-bold mb-3">GWD admin</p>
+          <nav className="flex lg:flex-col gap-1 flex-wrap" aria-label="Admin">
+            {navItems.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => openSection(item.key)}
+                aria-current={section === item.key ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
+                  section === item.key
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                {item.icon} {item.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors lg:mt-6"
+            >
+              <LogOut className="w-4 h-4" /> Log out
+            </button>
+          </nav>
+        </aside>
+        <main className="min-w-0">
+          {section === "posts"
+            ? view === "form" ? postForm : postList
+            : view === "form" ? resourceForm : resourceList}
+        </main>
       </div>
     </div>
   );

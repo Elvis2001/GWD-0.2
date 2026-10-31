@@ -7,6 +7,7 @@ export type AdminPostSummary = {
   category: string;
   createdAt: string | null;
   contentType?: "post" | "program" | "gallery" | "resource";
+  programArea?: string;
 };
 
 export type AdminPostDetails = AdminPostSummary & {
@@ -217,6 +218,7 @@ export async function listAdminPosts(): Promise<AdminPostSummary[]> {
     category: (entry.category as string) ?? "",
     createdAt: (entry.createdAt as string) ?? null,
     contentType: entry.contentType as "post" | "program" | "gallery" | "resource" | undefined,
+    programArea: entry.programArea as string | undefined,
   }));
 }
 
