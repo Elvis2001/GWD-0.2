@@ -11,6 +11,7 @@ const programs = [
   { title: "Digital Skills and Inclusion", href: "/programs/digital-skills" },
   { title: "Entrepreneurship & Employability", href: "/programs/entrepreneurship" },
   { title: "Future Founder's Acceleration and Innovation", href: "/programs/future-founders" },
+  { title: "Resources", href: "/programs/ai" },
 ];
 
 export function Navbar() {
