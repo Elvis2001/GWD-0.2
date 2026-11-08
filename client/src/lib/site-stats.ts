@@ -1,12 +1,12 @@
 // Single source of truth for organisation-wide figures. Every page that shows
 // a headline number reads it from here so the site never contradicts itself.
 // Update the values and `STATS_AS_OF` together.
-export const STATS_AS_OF = "October 2026";
+export const STATS_AS_OF = "November 2026";
 
 export const IMPACT_STATS = {
-  students: { value: 8000, suffix: "+", label: "Students reached" },
-  schools: { value: 25, suffix: "+", label: "Schools & institutions" },
-  trainingHours: { value: 25000, suffix: "+", label: "Training hours" },
+  students: { value: 12000, suffix: "+", label: "Students reached" },
+  schools: { value: 35, suffix: "+", label: "Schools & institutions" },
+  trainingHours: { value: 27000, suffix: "+", label: "Training hours" },
   partners: { value: 15, suffix: "+", label: "Partner organisations" },
 } as const;
 
@@ -27,6 +27,11 @@ export const PARTNERS = [
   "Kim Standard",
   "NE Innovation Hub",
   "Mentors International",
+  "Airforce Secondary School",
+  "Suleiman Ribadu College",
+  "Play and Learn",
+  "All Star Schools",
+  "Rochas Academy",
 ];
 
 // Lowest donation tier on /donate, used as the concrete ask on the home page.

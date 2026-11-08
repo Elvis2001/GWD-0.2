@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -219,14 +219,23 @@ export default function Home() {
   const [backgroundIndex, setBackgroundIndex] = useState(0);
   const [showStickyDonate, setShowStickyDonate] = useState(false);
 
-  // Background photos rotate; the headline stays fixed so first-time visitors
-  // always see what GWD does.
+  // Background photos come from the newest posts with images and rotate; the
+  // headline stays fixed so first-time visitors always see what GWD does.
+  const heroSlides: { image: string; post?: Post }[] = useMemo(() => {
+    const recent = (Array.isArray(posts) ? posts : [])
+      .filter((post) => getPostImage(post, ""))
+      .slice(0, 4)
+      .map((post) => ({ image: getPostImage(post, ""), post }));
+    return recent.length > 0 ? recent : GWD_IMAGES.map((image) => ({ image }));
+  }, [posts]);
+  const heroSlide = heroSlides[backgroundIndex % heroSlides.length];
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setBackgroundIndex((prev) => (prev + 1) % GWD_IMAGES.length);
+      setBackgroundIndex((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroSlides.length]);
 
   // Sticky mobile Donate button appears once the hero is scrolled past, so it never covers hero content.
   useEffect(() => {
@@ -265,14 +274,14 @@ export default function Home() {
       <section className="relative min-h-[680px] md:min-h-[88vh] flex items-center overflow-hidden pt-28 pb-16 md:pt-32 bg-gray-950">
         <AnimatePresence>
           <motion.div
-            key={backgroundIndex}
+            key={heroSlide.image}
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="absolute inset-0 z-0"
           >
-            <img src={GWD_IMAGES[backgroundIndex]} alt="" className="w-full h-full object-cover object-center" />
+            <img src={heroSlide.image} alt="" className="w-full h-full object-cover object-center" />
           </motion.div>
         </AnimatePresence>
         <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/90 via-black/75 to-black/40" />
@@ -330,6 +339,17 @@ export default function Home() {
                   Founder and Executive Director
                 </p>
               </div>
+
+              {heroSlide.post && (
+                <Link
+                  href={`/details/${heroSlide.post.category}/${heroSlide.post.id}`}
+                  className="mt-6 inline-flex max-w-full items-center gap-2 text-sm text-gray-200 hover:text-white"
+                >
+                  <span className="shrink-0 font-bold uppercase tracking-widest text-xs text-primary">Latest</span>
+                  <span className="truncate">{heroSlide.post.title}</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
+                </Link>
+              )}
             </motion.div>
 
             <motion.div
